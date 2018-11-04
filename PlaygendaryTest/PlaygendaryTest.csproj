@@ -80,8 +80,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\BlackRectangle.cs" />
+    <Compile Include="Assets\Scripts\Platform.cs" />
     <Compile Include="Assets\Scripts\PlatformManager.cs" />
+    <Compile Include="Assets\Scripts\PlatformState\BehindPlatform.cs" />
+    <Compile Include="Assets\Scripts\PlatformState\CenterPlatform.cs" />
+    <Compile Include="Assets\Scripts\PlatformState\FrontPlatform.cs" />
+    <Compile Include="Assets\Scripts\PlatformState\IPlatformState.cs" />
+    <Compile Include="Assets\Scripts\PlatformState\States.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
+    <Compile Include="Assets\Scripts\RedSquare.cs" />
     <Compile Include="Assets\Scripts\Stick.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

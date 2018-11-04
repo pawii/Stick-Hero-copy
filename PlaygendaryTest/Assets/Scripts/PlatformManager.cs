@@ -5,22 +5,37 @@ using System;
 
 public class PlatformManager : MonoBehaviour
 {
-    private GameObject platform1;
-    private GameObject platform2;
+    public static event Action<float, float> MovePlatform;
 
-    public static event Action<float> ChangePlatform1Size;
-    public static event Action<float> ChangePlatform2Size;
+    // сделать ридонли
+    public static Vector2 StartPos { get; private set; }
+
+    private float oldDistance = 8;
+    private float newDistance = 8;
+    [SerializeField]
+    private float minDistance;
+    [SerializeField]
+    private float maxDistance;
 
 
     private void Awake()
     {
-        platform1 = Resources.Load<GameObject>("Platform");
-        platform2 = Resources.Load<GameObject>("Platform");
+        StartPos = new Vector2(-4, 0);
+        Player.MoveNext += OnMoveNext;
     }
 
 
-    private void RandomizePlatform(GameObject platform)
+    private void OnDestroy()
     {
-        throw new NotImplementedException();
+        Player.MoveNext -= OnMoveNext;
+    }
+
+
+    private void OnMoveNext()
+    {
+        oldDistance = newDistance;
+        newDistance = UnityEngine.Random.Range(minDistance, maxDistance);
+        MovePlatform(oldDistance, newDistance);
+        Debug.Log(oldDistance);
     }
 }

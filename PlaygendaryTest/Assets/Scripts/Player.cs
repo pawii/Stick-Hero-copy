@@ -1,17 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Player : MonoBehaviour
 {
     [SerializeField]
     private float playerSpeed;
+    [SerializeField]
+    private Vector2 startPos;
 
     private Vector2 playerPos;
 
     // НЕ КОНСТАНТА (ОФСЕТ НА КРАЙ)
     private const float offsetPos = 1;
 
+    public static event Action MoveNext;
 
     private void Awake()
     {
@@ -27,14 +31,13 @@ public class Player : MonoBehaviour
 
     private void StartMovement(float stickSize)
     {
-        StartCoroutine(PlayerMovement(stickSize + offsetPos));
+        StartCoroutine(PlayerMovement(stickSize + offsetPos + startPos.x));
     }
 
 
     private IEnumerator PlayerMovement(float targetPos)
     {
         // проверить производительность с локальной переменной playerPos
-        playerPos = transform.position;
 
         while(playerPos.x != targetPos)
         {
@@ -47,7 +50,11 @@ public class Player : MonoBehaviour
 
             transform.position = playerPos;
 
-            yield return new WaitForFixedUpdate();
+            yield return null;//new WaitForFixedUpdate();
         }
+
+        MoveNext();
+        transform.position = startPos;
+        playerPos = startPos;
     }
 }

@@ -11,27 +11,41 @@ public class Stick : MonoBehaviour
     private float rotationSpeed;
     [SerializeField]
     private AudioSource audio;
+    [SerializeField]
+    private States state;
 
     private Vector3 rotation = new Vector3(0, 0, 0);
 
     public static event Action<float> StickFall;
 
 
-	private void Update ()
+    private void Awake()
     {
-        if (Input.GetMouseButtonDown(0))
+        Player.MoveNext += OnMoveNext;
+    }
+
+
+    private void OnDestroy()
+    {
+        Player.MoveNext -= OnMoveNext;
+    }
+
+
+    private void Update ()
+    {
+        if (Input.GetMouseButtonDown(0) && state == States.Center)
         {
             audio.Play();
         }
 
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && state == States.Center)
         {
             Vector2 scale = transform.localScale;
             scale.y += growSpeed * Time.deltaTime;
             transform.localScale = scale;
         }
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) && state == States.Center)
         {
             audio.Stop();
 
@@ -53,12 +67,27 @@ public class Stick : MonoBehaviour
 
             transform.localEulerAngles = rotation;
 
-            yield return new WaitForFixedUpdate();
+            yield return null;//new WaitForFixedUpdate();
         }
-
-        rotation.z = 0;
 
         StickFall(transform.localScale.y);
     }
 
+
+    private void OnMoveNext()
+    {
+        int newState = (int)state - 1;
+        if(newState == 0)
+        {
+            newState = 3;
+        }
+        state = (States)newState;
+
+        if (state == States.Front)
+        {
+            rotation.z = 0;
+            transform.localEulerAngles = rotation;
+            transform.localScale = new Vector2(1, 0);
+        }
+    }
 }
