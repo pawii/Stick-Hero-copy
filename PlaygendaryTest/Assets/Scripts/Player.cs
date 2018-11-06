@@ -136,7 +136,12 @@ public class Player : MonoBehaviour
             float targetPos = StartPos.x + PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
             StartCoroutine(PlayerMovement(targetPos, isFall));
 
-            if ()
+            float startRedSquare = PlatformManager.NewDistance + (PlatformManager.BehindPlatformWidth / 2f) - 0.25f;
+            float endRedSquare = startRedSquare + 0.5f;
+            if (stickSize > startRedSquare && stickSize < endRedSquare)
+            {
+                OnScoreUp();
+            }
         }
     }
 
