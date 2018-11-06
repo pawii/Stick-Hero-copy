@@ -6,6 +6,8 @@ using System;
 public class Player : MonoBehaviour
 {
     public static event Action OnMoveNext;
+    public static event Action OnStickFallDown;
+    public static event Action OnScoreUp;
 
 
     [SerializeField]
@@ -13,9 +15,12 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float playerSpeed;
     [SerializeField]
+    private float playerFallSpeed;
 
 
     public static Vector2 StartPos { get; private set; }
+
+
     private Vector2 playerPos;
 
 
@@ -23,16 +28,16 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        StartPos = new Vector2(-4, 0.42f);
+        StartPos = transform.position;
         playerPos = StartPos;
 
-        Stick.OnStickFall += Player_OnStickFall;
+        Stick.OnStickFallHorizontal += Player_OnStickFallHorizontal;
     }
 
 
     private void OnDestroy()
     {
-        Stick.OnStickFall -= Player_OnStickFall;
+        Stick.OnStickFallHorizontal -= Player_OnStickFallHorizontal;
     }
 
     #endregion
@@ -40,7 +45,7 @@ public class Player : MonoBehaviour
 
     #region Private methods
 
-    private IEnumerator PlayerMovement(float targetPos)
+    private IEnumerator PlayerMovement(float targetPos, bool isFall)
     {
         anim.SetBool("isRun", true);
 
@@ -58,26 +63,54 @@ public class Player : MonoBehaviour
             yield return null;
         }
 
-        playerPos = StartPos;
-        StartCoroutine(MoveForTime(StartPos));
+        if (!isFall)
+        {
+            playerPos = StartPos;
+            StartCoroutine(MoveBackForTime());
+
+            OnScoreUp();
+            OnMoveNext();
+        }
+        else
+        {
+            OnStickFallDown();
+            StartCoroutine(PlayerFall());
+        }
 
         anim.SetBool("isRun", false);
+    }
 
-        OnMoveNext();
+
+    private IEnumerator PlayerFall()
+    {
+        float targetPos = playerPos.y - 10;
+        while (playerPos.y != targetPos)
+        {
+            playerPos.y -= playerFallSpeed * Time.deltaTime;
+
+            if (playerPos.y < targetPos)
+            {
+                playerPos.y = targetPos;
+            }
+
+            transform.position = playerPos;
+
+            yield return null;
+        }
     }
 
 
     // ДУБЛИРОВАНИЕ КОДА
-    private IEnumerator MoveForTime(Vector2 targetPos)
+    private IEnumerator MoveBackForTime()
     {
-        Vector2 startPosition = transform.position;
+        Vector2 beginMovementPosition = transform.position;
         float startTime = Time.realtimeSinceStartup;
         float fraction = 0f;
 
         while (fraction < 1f)
         {
             fraction = Mathf.Clamp01((Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME);
-            transform.position = Vector2.Lerp(startPosition, targetPos, fraction);
+            transform.position = Vector2.Lerp(beginMovementPosition, StartPos, fraction);
             yield return null;
         }
     }
@@ -87,11 +120,24 @@ public class Player : MonoBehaviour
 
 
     #region Event handlers
-
-    private void Player_OnStickFall(float stickSize)
+        
+    private void Player_OnStickFallHorizontal(float stickSize)
     {
-        float targetPos = StartPos.x + PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
-        StartCoroutine(PlayerMovement(targetPos));
+        float endOfPlatform = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
+        bool isFall = stickSize < PlatformManager.NewDistance || stickSize > endOfPlatform;
+
+        if (isFall)
+        {
+            float targetPos = StartPos.x + stickSize;
+            StartCoroutine(PlayerMovement(targetPos, isFall));
+        }
+        else
+        {
+            float targetPos = StartPos.x + PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
+            StartCoroutine(PlayerMovement(targetPos, isFall));
+
+            if ()
+        }
     }
 
     #endregion

@@ -5,7 +5,8 @@ using System;
 
 public class Stick : PartOfPlatform
 {
-    public static event Action<float> OnStickFall;
+    public static event Action<float> OnStickFallHorizontal;
+    //public static event Action<float> OnEndGame;
 
 
     [SerializeField]
@@ -20,6 +21,20 @@ public class Stick : PartOfPlatform
 
 
     #region Unity lifecycle
+
+    private new void Awake()
+    {
+        base.Awake();
+        Player.OnStickFallDown += Stick_OnStickFallDown;
+    }
+
+
+    private new void OnDestroy()
+    {
+        base.OnDestroy();
+        Player.OnStickFallDown += Stick_OnStickFallDown;
+    }
+
 
     private void Update ()
     {
@@ -39,7 +54,7 @@ public class Stick : PartOfPlatform
         {
             audio.Stop();
 
-            StartCoroutine(StickFalling());
+            StartCoroutine(StickFallingHorizontal());
         }
 	}
 
@@ -48,7 +63,27 @@ public class Stick : PartOfPlatform
 
     #region Private methods
 
-    private IEnumerator StickFalling()
+    private IEnumerator StickFallingDown()
+    {
+        while (rotation.z != -180)
+        {
+            rotation.z -= rotationSpeed * Time.deltaTime;
+
+            if (rotation.z < -180)
+            {
+                rotation.z = -180;
+            }
+
+            transform.localEulerAngles = rotation;
+
+            yield return null;
+        }
+
+        //OnEndGame;
+    }
+
+
+    private IEnumerator StickFallingHorizontal()
     {
         while (rotation.z != -90)
         {
@@ -64,12 +99,24 @@ public class Stick : PartOfPlatform
             yield return null;
         }
 
-        OnStickFall(transform.localScale.y);
+        OnStickFallHorizontal(transform.localScale.y);
     }
 
     #endregion
 
-    
+    #region Event handlers
+
+    private void Stick_OnStickFallDown()
+    {
+        if (state == States.Center)
+        {
+            StartCoroutine(StickFallingDown());
+        }
+    }
+
+    #endregion
+
+
     protected override void HandleOnMovePlatform()
     {
         if (state == States.Behind)

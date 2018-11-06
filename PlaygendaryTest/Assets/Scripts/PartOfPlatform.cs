@@ -10,13 +10,13 @@ public abstract class PartOfPlatform : MonoBehaviour
 
     #region Unity lifecycle
 
-    private void Awake()
+    protected void Awake()
     {
         PlatformManager.OnMovePlatform += PartOfPlatform_OnMovePlatform;
     }
 
 
-    private void OnDestroy()
+    protected void OnDestroy()
     {
         PlatformManager.OnMovePlatform += PartOfPlatform_OnMovePlatform;
     }
