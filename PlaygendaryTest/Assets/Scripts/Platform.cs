@@ -7,8 +7,11 @@ public class Platform : MonoBehaviour
     [SerializeField]
     private States startState;
 
+
     public IPlatformState State { get; set; }
 
+
+    #region Unity lifecycle
 
     private void Awake()
     {
@@ -25,26 +28,40 @@ public class Platform : MonoBehaviour
                 break;
         }
 
-        PlatformManager.MovePlatform += OnMovePlatform;
+        PlatformManager.OnMovePlatform += Platform_OnMovePlatform;
     }
 
 
     private void OnDestroy()
     {
-        PlatformManager.MovePlatform -= OnMovePlatform;
+        PlatformManager.OnMovePlatform -= Platform_OnMovePlatform;
     }
 
+    #endregion
 
-    private void OnMovePlatform(float oldDistance, float newDistance)
+
+    #region Event handlers
+
+    private void Platform_OnMovePlatform()
     {
-        //oldDistance = newDistance;
-        //float returnDistance = State.OnMoveNext(this, oldDistance, minDistance, maxDistance);
-        //if(returnDistance != oldDistance)
-        //{
-        //    newDistance = returnDistance;
-        //}
-        //Debug.Log("oldDistance: " + oldDistance);
-        //Debug.Log("newDistance: " + newDistance);
-        State.MovePlatform(this, oldDistance, newDistance);
+        Vector2 targetPos = State.MovePlatform(this);
+        StartCoroutine(MoveForTime(targetPos));
+    }
+
+    #endregion
+
+
+    private IEnumerator MoveForTime(Vector2 targetPos)
+    {
+        Vector2 startPosition = transform.position;
+        float startTime = Time.realtimeSinceStartup;
+        float fraction = 0f;
+
+        while (fraction < 1f)
+        {
+            fraction = Mathf.Clamp01((Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME);
+            transform.position = Vector2.Lerp(startPosition, targetPos, fraction);
+            yield return null;
+        }
     }
 }

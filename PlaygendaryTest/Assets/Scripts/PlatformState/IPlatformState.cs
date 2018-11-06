@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IPlatformState
+public interface IPlatformState 
 {
-    void MovePlatform(Platform platform, float oldDistance, float newDistance);
+    Vector2 MovePlatform(Platform platform);
 }

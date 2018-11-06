@@ -5,39 +5,44 @@ using System;
 
 public class Player : MonoBehaviour
 {
+    public static event Action OnMoveNext;
+
+
+    [SerializeField]
+    private Animator anim;
     [SerializeField]
     private float playerSpeed;
     [SerializeField]
-    private Vector2 startPos;
 
+
+    public static Vector2 StartPos { get; private set; }
     private Vector2 playerPos;
 
-    // НЕ КОНСТАНТА (ОФСЕТ НА КРАЙ)
-    private const float offsetPos = 1;
 
-    public static event Action MoveNext;
+    #region Unity lifecycle
 
     private void Awake()
     {
-        Stick.StickFall += StartMovement;
+        StartPos = new Vector2(-4, 0.42f);
+        playerPos = StartPos;
+
+        Stick.OnStickFall += Player_OnStickFall;
     }
 
 
     private void OnDestroy()
     {
-        Stick.StickFall -= StartMovement;
+        Stick.OnStickFall -= Player_OnStickFall;
     }
 
+    #endregion
 
-    private void StartMovement(float stickSize)
-    {
-        StartCoroutine(PlayerMovement(stickSize + offsetPos + startPos.x));
-    }
 
+    #region Private methods
 
     private IEnumerator PlayerMovement(float targetPos)
     {
-        // проверить производительность с локальной переменной playerPos
+        anim.SetBool("isRun", true);
 
         while(playerPos.x != targetPos)
         {
@@ -50,11 +55,44 @@ public class Player : MonoBehaviour
 
             transform.position = playerPos;
 
-            yield return null;//new WaitForFixedUpdate();
+            yield return null;
         }
 
-        MoveNext();
-        transform.position = startPos;
-        playerPos = startPos;
+        playerPos = StartPos;
+        StartCoroutine(MoveForTime(StartPos));
+
+        anim.SetBool("isRun", false);
+
+        OnMoveNext();
     }
+
+
+    // ДУБЛИРОВАНИЕ КОДА
+    private IEnumerator MoveForTime(Vector2 targetPos)
+    {
+        Vector2 startPosition = transform.position;
+        float startTime = Time.realtimeSinceStartup;
+        float fraction = 0f;
+
+        while (fraction < 1f)
+        {
+            fraction = Mathf.Clamp01((Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME);
+            transform.position = Vector2.Lerp(startPosition, targetPos, fraction);
+            yield return null;
+        }
+    }
+    // ДУБЛИРОВАНИЕ КОДА
+
+    #endregion
+
+
+    #region Event handlers
+
+    private void Player_OnStickFall(float stickSize)
+    {
+        float targetPos = StartPos.x + PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
+        StartCoroutine(PlayerMovement(targetPos));
+    }
+
+    #endregion
 }

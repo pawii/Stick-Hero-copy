@@ -1,33 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
-public class BlackRectangle : MonoBehaviour
+public class BlackRectangle : PartOfPlatform
 {
-    [SerializeField]
-    private float minSize;
-    [SerializeField]
-    private float maxSize;
 
-    private const int scaleY = 1;
-
-
-    private void Awake()
+    protected override void HandleOnMovePlatform()
     {
-        //PlatformManager.NextPlatform += ChangeScale;
+        if (state == States.Behind)
+        {
+            transform.localScale = new Vector2(PlatformManager.BehindPlatformWidth, 1);
+        }
     }
 
-
-    private void OnDestroy()
-    {
-        //PlatformManager.NextPlatform -= ChangeScale;
-    }
-
-    
-    private void ChangeScale(float scale)
-    {
-        throw new NotImplementedException();
-        //transform.localScale = new Vector2(Random.Range(minSize, maxSize), scaleY);
-    }
 }

@@ -5,37 +5,64 @@ using System;
 
 public class PlatformManager : MonoBehaviour
 {
-    public static event Action<float, float> MovePlatform;
+    public const float MOVE_TIME = 0.5f;
+    public const float CENTER_PLATFORM_OFFSET = 0.3f;
 
-    // сделать ридонли
-    public static Vector2 StartPos { get; private set; }
 
-    private float oldDistance = 8;
-    private float newDistance = 8;
+    public static event Action OnMovePlatform;
+
+
     [SerializeField]
     private float minDistance;
     [SerializeField]
     private float maxDistance;
+    [SerializeField]
+    private float minPlatformWidth;
+    [SerializeField]
+    private float maxPlatformWidth;
 
+
+    public static float OldDistance { get; private set; }  // дистанция между краями платформ
+    public static float NewDistance { get; private set; }  // (не между центрами)
+    public static float CenterPlatformWidth { get; private set; }
+    public static float FontPlatformWidth { get; private set; }
+    public static float BehindPlatformWidth { get; private set; }
+
+
+    #region Unity lifecycle
 
     private void Awake()
     {
-        StartPos = new Vector2(-4, 0);
-        Player.MoveNext += OnMoveNext;
+        OldDistance = 4;
+        NewDistance = 4;
+        CenterPlatformWidth = 1;
+        FontPlatformWidth = 1;
+        BehindPlatformWidth = 1;
+
+        Player.OnMoveNext += PlatformManager_OnMoveNext;
     }
 
 
     private void OnDestroy()
     {
-        Player.MoveNext -= OnMoveNext;
+        Player.OnMoveNext -= PlatformManager_OnMoveNext;
     }
 
+    #endregion
 
-    private void OnMoveNext()
+
+    #region Event handlers
+
+    private void PlatformManager_OnMoveNext()
     {
-        oldDistance = newDistance;
-        newDistance = UnityEngine.Random.Range(minDistance, maxDistance);
-        MovePlatform(oldDistance, newDistance);
-        Debug.Log(oldDistance);
+        OldDistance = NewDistance;
+        NewDistance = UnityEngine.Random.Range(minDistance, maxDistance);
+        CenterPlatformWidth = FontPlatformWidth;
+        FontPlatformWidth = BehindPlatformWidth;
+        BehindPlatformWidth = UnityEngine.Random.Range(minPlatformWidth, maxPlatformWidth);
+
+        OnMovePlatform();
     }
+
+    #endregion
 }

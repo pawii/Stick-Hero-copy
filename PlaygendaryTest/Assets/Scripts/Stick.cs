@@ -3,33 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Stick : MonoBehaviour
+public class Stick : PartOfPlatform
 {
+    public static event Action<float> OnStickFall;
+
+
     [SerializeField]
     private float growSpeed;
     [SerializeField]
     private float rotationSpeed;
     [SerializeField]
     private AudioSource audio;
-    [SerializeField]
-    private States state;
+
 
     private Vector3 rotation = new Vector3(0, 0, 0);
 
-    public static event Action<float> StickFall;
 
-
-    private void Awake()
-    {
-        Player.MoveNext += OnMoveNext;
-    }
-
-
-    private void OnDestroy()
-    {
-        Player.MoveNext -= OnMoveNext;
-    }
-
+    #region Unity lifecycle
 
     private void Update ()
     {
@@ -53,6 +43,10 @@ public class Stick : MonoBehaviour
         }
 	}
 
+    #endregion
+
+
+    #region Private methods
 
     private IEnumerator StickFalling()
     {
@@ -67,27 +61,29 @@ public class Stick : MonoBehaviour
 
             transform.localEulerAngles = rotation;
 
-            yield return null;//new WaitForFixedUpdate();
+            yield return null;
         }
 
-        StickFall(transform.localScale.y);
+        OnStickFall(transform.localScale.y);
     }
 
+    #endregion
 
-    private void OnMoveNext()
+    
+    protected override void HandleOnMovePlatform()
     {
-        int newState = (int)state - 1;
-        if(newState == 0)
+        if (state == States.Behind)
         {
-            newState = 3;
-        }
-        state = (States)newState;
+            transform.localScale = new Vector2(1, 0);
 
-        if (state == States.Front)
-        {
             rotation.z = 0;
             transform.localEulerAngles = rotation;
-            transform.localScale = new Vector2(1, 0);
+        }
+        else if (state == States.Front)
+        {
+            Vector2 newPos = Vector2.zero;
+            newPos.x += PlatformManager.FontPlatformWidth / 2f;
+            transform.localPosition = newPos;
         }
     }
 }

@@ -2,35 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RedSquare : MonoBehaviour
+public class RedSquare : PartOfPlatform
 {
-    [SerializeField]
-    private States state;
 
-    
-    private void Awake()
+    protected override void HandleOnMovePlatform()
     {
-        Player.MoveNext += OnMoveNext;
-    }
-
-
-    private void OnDestroy()
-    {
-        Player.MoveNext -= OnMoveNext;
-    }
-
-
-    // дублирование кода
-    private void OnMoveNext()
-    {
-        int newState = (int)state - 1;
-        if (newState == 0)
-        {
-            newState = 3;
-        }
-        state = (States)newState;
-
-        if(state == States.Front)
+        if(state == States.Behind)
         {
             gameObject.SetActive(true);
         }
@@ -39,4 +16,5 @@ public class RedSquare : MonoBehaviour
             gameObject.SetActive(false);
         }
     }
+
 }
