@@ -11,10 +11,19 @@ public class Platform : MonoBehaviour
     public IPlatformState State { get; set; }
 
 
+    private bool isMove;
+    private Vector2 startPosition;
+    private Vector2 targetPosition;
+    private float startTime;
+    private float fraction;
+
+
     #region Unity lifecycle
 
     private void Awake()
     {
+        isMove = false;
+
         switch (startState)
         {
             case States.Behind:
@@ -37,6 +46,22 @@ public class Platform : MonoBehaviour
         PlatformManager.OnMovePlatform -= Platform_OnMovePlatform;
     }
 
+
+    private void Update()
+    {
+        if (isMove)
+        {
+            fraction = Mathf.Clamp01((Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME);
+            if (fraction > 1f)
+            {
+                fraction = 1;
+                isMove = false;
+            }
+
+            transform.position = Vector2.Lerp(startPosition, targetPosition, fraction);
+        }
+    }
+
     #endregion
 
 
@@ -44,24 +69,12 @@ public class Platform : MonoBehaviour
 
     private void Platform_OnMovePlatform()
     {
-        Vector2 targetPos = State.MovePlatform(this);
-        StartCoroutine(MoveForTime(targetPos));
+        targetPosition = State.MovePlatform(this);
+        startPosition = transform.position;
+        startTime = Time.realtimeSinceStartup;
+        fraction = 0f;
+        isMove = true;
     }
 
     #endregion
-
-
-    private IEnumerator MoveForTime(Vector2 targetPos)
-    {
-        Vector2 startPosition = transform.position;
-        float startTime = Time.realtimeSinceStartup;
-        float fraction = 0f;
-
-        while (fraction < 1f)
-        {
-            fraction = Mathf.Clamp01((Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME);
-            transform.position = Vector2.Lerp(startPosition, targetPos, fraction);
-            yield return null;
-        }
-    }
 }

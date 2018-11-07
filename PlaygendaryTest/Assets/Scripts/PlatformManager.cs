@@ -57,6 +57,7 @@ public class PlatformManager : MonoBehaviour
     {
         OldDistance = NewDistance;
         NewDistance = UnityEngine.Random.Range(minDistance, maxDistance);
+
         CenterPlatformWidth = FontPlatformWidth;
         FontPlatformWidth = BehindPlatformWidth;
         BehindPlatformWidth = UnityEngine.Random.Range(minPlatformWidth, maxPlatformWidth);

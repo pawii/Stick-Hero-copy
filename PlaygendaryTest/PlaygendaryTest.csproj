@@ -79,7 +79,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Background.cs" />
     <Compile Include="Assets\Scripts\BlackRectangle.cs" />
+    <Compile Include="Assets\Scripts\MovementState.cs" />
     <Compile Include="Assets\Scripts\PartOfPlatform.cs" />
     <Compile Include="Assets\Scripts\Platform.cs" />
     <Compile Include="Assets\Scripts\PlatformManager.cs" />

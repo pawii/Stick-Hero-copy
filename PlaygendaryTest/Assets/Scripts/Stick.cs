@@ -5,8 +5,11 @@ using System;
 
 public class Stick : PartOfPlatform
 {
+    private const int FALL_DOWN_ANGLE = -180;
+    private const int FALL_HORIZONTAL_ANGLE = -90;
+
+
     public static event Action<float> OnStickFallHorizontal;
-    //public static event Action<float> OnEndGame;
 
 
     [SerializeField]
@@ -17,13 +20,18 @@ public class Stick : PartOfPlatform
     private AudioSource audio;
 
 
-    private Vector3 rotation = new Vector3(0, 0, 0);
+    private bool isRotate;
+    private Vector3 currentRotation;
+    private Vector3 endRotation;
+    private Vector3 scale;
 
 
     #region Unity lifecycle
 
     private new void Awake()
     {
+        scale = Vector2.right;
+
         base.Awake();
         Player.OnStickFallDown += Stick_OnStickFallDown;
     }
@@ -38,69 +46,46 @@ public class Stick : PartOfPlatform
 
     private void Update ()
     {
-        if (Input.GetMouseButtonDown(0) && state == States.Center)
+        if (state == States.Center)
         {
-            audio.Play();
-        }
+            if (Input.GetMouseButtonDown(0))
+            {
+                audio.Play();
+            }
 
-        if (Input.GetMouseButton(0) && state == States.Center)
-        {
-            Vector2 scale = transform.localScale;
-            scale.y += growSpeed * Time.deltaTime;
-            transform.localScale = scale;
-        }
+            if (Input.GetMouseButton(0))
+            {
+                scale.y += growSpeed * Time.deltaTime;
+                transform.localScale = scale;
+            }
 
-        if (Input.GetMouseButtonUp(0) && state == States.Center)
-        {
-            audio.Stop();
+            if (Input.GetMouseButtonUp(0))
+            {
+                audio.Stop();
+                
+                endRotation.z = FALL_HORIZONTAL_ANGLE;
+                isRotate = true;
+            }
 
-            StartCoroutine(StickFallingHorizontal());
+            if (isRotate)
+            {
+                currentRotation.z -= rotationSpeed * Time.deltaTime;
+
+                if (currentRotation.z < endRotation.z)
+                {
+                    currentRotation.z = endRotation.z;
+                    isRotate = false;
+
+                    if(currentRotation.z == FALL_HORIZONTAL_ANGLE)
+                    {
+                        OnStickFallHorizontal(transform.localScale.y);
+                    }
+                }
+
+                transform.localEulerAngles = currentRotation;
+            }
         }
 	}
-
-    #endregion
-
-
-    #region Private methods
-
-    private IEnumerator StickFallingDown()
-    {
-        while (rotation.z != -180)
-        {
-            rotation.z -= rotationSpeed * Time.deltaTime;
-
-            if (rotation.z < -180)
-            {
-                rotation.z = -180;
-            }
-
-            transform.localEulerAngles = rotation;
-
-            yield return null;
-        }
-
-        //OnEndGame;
-    }
-
-
-    private IEnumerator StickFallingHorizontal()
-    {
-        while (rotation.z != -90)
-        {
-            rotation.z -= rotationSpeed * Time.deltaTime;
-
-            if (rotation.z < -90)
-            {
-                rotation.z = -90;
-            }
-
-            transform.localEulerAngles = rotation;
-
-            yield return null;
-        }
-
-        OnStickFallHorizontal(transform.localScale.y);
-    }
 
     #endregion
 
@@ -110,7 +95,8 @@ public class Stick : PartOfPlatform
     {
         if (state == States.Center)
         {
-            StartCoroutine(StickFallingDown());
+            endRotation.z = FALL_DOWN_ANGLE;
+            isRotate = true;
         }
     }
 
@@ -121,10 +107,11 @@ public class Stick : PartOfPlatform
     {
         if (state == States.Behind)
         {
-            transform.localScale = new Vector2(1, 0);
+            scale = Vector2.right;
+            transform.localScale = scale;
 
-            rotation.z = 0;
-            transform.localEulerAngles = rotation;
+            currentRotation.z = 0;
+            transform.localEulerAngles = currentRotation;
         }
         else if (state == States.Front)
         {

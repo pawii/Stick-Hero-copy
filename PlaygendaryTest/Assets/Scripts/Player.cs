@@ -20,8 +20,16 @@ public class Player : MonoBehaviour
 
     public static Vector2 StartPos { get; private set; }
 
-
+    
     private Vector2 playerPos;
+    private Vector2 statrPosition;
+    private Vector2 targetPosition;
+    private float fraction;
+    private float startTime;
+    private float movementTime;
+    private bool isMove;
+    private bool isFall;
+    private bool isContinueMove;
 
 
     #region Unity lifecycle
@@ -40,81 +48,79 @@ public class Player : MonoBehaviour
         Stick.OnStickFallHorizontal -= Player_OnStickFallHorizontal;
     }
 
+
+    private void Update()
+    {
+        if (isMove)
+        {
+            fraction = (Time.realtimeSinceStartup - startTime) / movementTime;
+
+            if (fraction > 1f)
+            {
+                fraction = 1;
+
+                isMove = false;
+
+                if (!isContinueMove)
+                {
+                    anim.SetBool("isRun", false);
+                }
+            }
+
+            playerPos = Vector2.Lerp(statrPosition, targetPosition, fraction);
+            transform.position = playerPos;
+
+            if (!isMove && isContinueMove)
+            {
+                if (isFall)
+                {
+                    OnStickFallDown();
+
+                    targetPosition = playerPos;
+                    targetPosition.y -= 10;
+                    movementTime = PlatformManager.MOVE_TIME;
+
+                    anim.SetBool("isRun", false);
+                }
+                else
+                {
+                    OnScoreUp();
+                    OnMoveNext();
+
+                    targetPosition = StartPos;
+                    movementTime = PlatformManager.MOVE_TIME;
+
+                }
+
+                statrPosition = playerPos;
+                startTime = Time.realtimeSinceStartup;
+                fraction = 0;
+
+                isMove = true;
+                isContinueMove = false;
+            }
+        }
+    }
+
     #endregion
 
 
     #region Private methods
 
-    private IEnumerator PlayerMovement(float targetPos, bool isFall)
+    private void StartMove(Vector2 targetPosition, float movementTime, bool isFall)
     {
         anim.SetBool("isRun", true);
 
-        while(playerPos.x != targetPos)
-        {
-            playerPos.x += playerSpeed * Time.deltaTime;
+        this.targetPosition = targetPosition;
+        this.movementTime = movementTime;
+        this.isFall = isFall;
 
-            if(playerPos.x > targetPos)
-            {
-                playerPos.x = targetPos;
-            }
-
-            transform.position = playerPos;
-
-            yield return null;
-        }
-
-        if (!isFall)
-        {
-            playerPos = StartPos;
-            StartCoroutine(MoveBackForTime());
-
-            OnScoreUp();
-            OnMoveNext();
-        }
-        else
-        {
-            OnStickFallDown();
-            StartCoroutine(PlayerFall());
-        }
-
-        anim.SetBool("isRun", false);
+        statrPosition = playerPos;
+        startTime = Time.realtimeSinceStartup;
+        fraction = 0;
+        isMove = true;
+        isContinueMove = true;
     }
-
-
-    private IEnumerator PlayerFall()
-    {
-        float targetPos = playerPos.y - 10;
-        while (playerPos.y != targetPos)
-        {
-            playerPos.y -= playerFallSpeed * Time.deltaTime;
-
-            if (playerPos.y < targetPos)
-            {
-                playerPos.y = targetPos;
-            }
-
-            transform.position = playerPos;
-
-            yield return null;
-        }
-    }
-
-
-    // ДУБЛИРОВАНИЕ КОДА
-    private IEnumerator MoveBackForTime()
-    {
-        Vector2 beginMovementPosition = transform.position;
-        float startTime = Time.realtimeSinceStartup;
-        float fraction = 0f;
-
-        while (fraction < 1f)
-        {
-            fraction = Mathf.Clamp01((Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME);
-            transform.position = Vector2.Lerp(beginMovementPosition, StartPos, fraction);
-            yield return null;
-        }
-    }
-    // ДУБЛИРОВАНИЕ КОДА
 
     #endregion
 
@@ -126,15 +132,18 @@ public class Player : MonoBehaviour
         float endOfPlatform = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
         bool isFall = stickSize < PlatformManager.NewDistance || stickSize > endOfPlatform;
 
+        Vector2 targetPosition = StartPos;
+        float movementTime = 1f;
+
         if (isFall)
         {
-            float targetPos = StartPos.x + stickSize;
-            StartCoroutine(PlayerMovement(targetPos, isFall));
+            targetPosition.x += stickSize;
+            movementTime = stickSize / playerSpeed;
         }
         else
         {
-            float targetPos = StartPos.x + PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
-            StartCoroutine(PlayerMovement(targetPos, isFall));
+            targetPosition.x += PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
+            movementTime = (PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth) / playerSpeed;
 
             float startRedSquare = PlatformManager.NewDistance + (PlatformManager.BehindPlatformWidth / 2f) - 0.25f;
             float endRedSquare = startRedSquare + 0.5f;
@@ -143,6 +152,8 @@ public class Player : MonoBehaviour
                 OnScoreUp();
             }
         }
+
+        StartMove(targetPosition, movementTime, isFall);
     }
 
     #endregion

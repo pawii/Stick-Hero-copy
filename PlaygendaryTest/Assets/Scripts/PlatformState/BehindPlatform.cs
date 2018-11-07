@@ -11,7 +11,6 @@ public class BehindPlatform : IPlatformState
         platform.transform.position = new Vector2(10, 0);
 
         Vector2 targetPos = Vector2.zero;
-        //targetPos.x += Player.StartPos.x + PlatformManager.CENTER_PLATFORM_OFFSET + PlatformManager.NewDistance;
         targetPos.x += Player.StartPos.x + PlatformManager.CENTER_PLATFORM_OFFSET;
         targetPos.x += PlatformManager.BehindPlatformWidth / 2f;
         targetPos.x += PlatformManager.NewDistance;
