@@ -32,6 +32,7 @@ public class ScoreManager : MonoBehaviour
 
         Player.OnScoreUp += ScoreManager_OnScoreUp;
         Player.OnEndGame += ScoreManager_OnEndGame;
+        EndMenu.OnReloadGame += ScoreManager_OnReloadGame;
 
         UnloadScore();
     }
@@ -41,6 +42,7 @@ public class ScoreManager : MonoBehaviour
     {
         Player.OnScoreUp -= ScoreManager_OnScoreUp;
         Player.OnEndGame -= ScoreManager_OnEndGame;
+        EndMenu.OnReloadGame += ScoreManager_OnReloadGame;
     }
 
     #endregion
@@ -64,6 +66,12 @@ public class ScoreManager : MonoBehaviour
         {
             SaveScore();
         }
+    }
+
+
+    private void ScoreManager_OnReloadGame()
+    {
+        CurrentScore = 0;
     }
 
     #endregion

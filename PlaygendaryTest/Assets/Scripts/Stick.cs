@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.EventSystems;
 
 public class Stick : PartOfPlatform
 {
@@ -58,7 +59,7 @@ public class Stick : PartOfPlatform
     {
         if (state == States.Center)
         {
-            if (!isLock)
+            if (!isLock && !EventSystem.current.IsPointerOverGameObject())
             {
                 if (Input.GetMouseButtonDown(0))
                 {

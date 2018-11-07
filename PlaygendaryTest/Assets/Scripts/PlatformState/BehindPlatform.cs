@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class BehindPlatform : IPlatformState
 {
@@ -18,6 +19,12 @@ public class BehindPlatform : IPlatformState
         platform.State = new FrontPlatform();
 
         return targetPos;
+    }
+
+
+    public Vector2 RefreshPlatform()
+    {
+        throw new NotImplementedException();
     }
 
     #endregion

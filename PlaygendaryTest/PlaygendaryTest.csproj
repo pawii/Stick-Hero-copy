@@ -93,10 +93,10 @@
     <Compile Include="Assets\Scripts\PlatformState\States.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\RedSquare.cs" />
-    <Compile Include="Assets\Scripts\Score.cs" />
     <Compile Include="Assets\Scripts\Stick.cs" />
     <Compile Include="Assets\Scripts\UI\EndMenu.cs" />
     <Compile Include="Assets\Scripts\UI\ScoreDuringGame.cs" />
+    <Compile Include="Assets\Scripts\UI\StartMenu.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

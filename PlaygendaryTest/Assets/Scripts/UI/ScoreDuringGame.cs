@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Score : MonoBehaviour
+public class ScoreDuringGame : MonoBehaviour
 {
     [SerializeField]
     Text scoreText;
@@ -20,13 +20,21 @@ public class Score : MonoBehaviour
     {
         scoreText.text = "0";
 
-        Player.OnScoreUp += Score_OnScoreUp;
+        Player.OnScoreUp += ScoreDuringGame_OnScoreUp;
+        Player.OnEndGame += ScoreDuringGame_OnEndGame;
+        EndMenu.OnReloadGame += ScoreDuringGame_OnReloadGame;
+        StartMenu.OnStartGame += ScoreDuringGame_OnStartGame;
+
+        gameObject.SetActive(false);
     }
 
 
     private void OnDestroy()
     {
-        Player.OnScoreUp -= Score_OnScoreUp;
+        Player.OnScoreUp -= ScoreDuringGame_OnScoreUp;
+        Player.OnEndGame -= ScoreDuringGame_OnEndGame;
+        EndMenu.OnReloadGame -= ScoreDuringGame_OnReloadGame;
+        StartMenu.OnStartGame -= ScoreDuringGame_OnStartGame;
     }
 
     #endregion
@@ -34,13 +42,33 @@ public class Score : MonoBehaviour
 
     #region Event handlers
 
-    private void Score_OnScoreUp()
+    private void ScoreDuringGame_OnScoreUp()
     {
         score++;
 
         scoreText.text = score.ToString();
 
         audio.Play();
+    }
+
+
+    private void ScoreDuringGame_OnEndGame()
+    {
+        gameObject.SetActive(false);
+    }
+
+
+    private void ScoreDuringGame_OnReloadGame()
+    {
+        score = 0;
+        scoreText.text = "0";
+        gameObject.SetActive(true);
+    }
+
+
+    private void ScoreDuringGame_OnStartGame()
+    {
+        gameObject.SetActive(true);
     }
 
     #endregion
