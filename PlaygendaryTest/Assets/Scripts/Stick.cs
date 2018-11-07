@@ -20,6 +20,7 @@ public class Stick : PartOfPlatform
     private AudioSource audio;
 
 
+    private bool isLock;
     private bool isRotate;
     private Vector3 currentRotation;
     private Vector3 endRotation;
@@ -31,9 +32,14 @@ public class Stick : PartOfPlatform
     private new void Awake()
     {
         scale = Vector2.right;
+        isLock = false;
 
         base.Awake();
         Player.OnStickFallDown += Stick_OnStickFallDown;
+        Player.OnPlayerStartHorizontalMovement += Stick_OnPlayerStartHorizontalMovement;
+        Platform.OnPlatformEndMovement += Stick_OnPlatformEndMovement;
+        Player.OnEndGame += Stick_OnEndGame;
+        EndMenu.OnReloadGame += Stick_OnReloadGame;
     }
 
 
@@ -41,6 +47,10 @@ public class Stick : PartOfPlatform
     {
         base.OnDestroy();
         Player.OnStickFallDown += Stick_OnStickFallDown;
+        Player.OnPlayerStartHorizontalMovement -= Stick_OnPlayerStartHorizontalMovement;
+        Platform.OnPlatformEndMovement -= Stick_OnPlatformEndMovement;
+        Player.OnEndGame -= Stick_OnEndGame;
+        EndMenu.OnReloadGame -= Stick_OnReloadGame;
     }
 
 
@@ -48,23 +58,26 @@ public class Stick : PartOfPlatform
     {
         if (state == States.Center)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (!isLock)
             {
-                audio.Play();
-            }
+                if (Input.GetMouseButtonDown(0))
+                {
+                    audio.Play();
+                }
 
-            if (Input.GetMouseButton(0))
-            {
-                scale.y += growSpeed * Time.deltaTime;
-                transform.localScale = scale;
-            }
+                if (Input.GetMouseButton(0))
+                {
+                    scale.y += growSpeed * Time.deltaTime;
+                    transform.localScale = scale;
+                }
 
-            if (Input.GetMouseButtonUp(0))
-            {
-                audio.Stop();
-                
-                endRotation.z = FALL_HORIZONTAL_ANGLE;
-                isRotate = true;
+                if (Input.GetMouseButtonUp(0))
+                {
+                    audio.Stop();
+
+                    endRotation.z = FALL_HORIZONTAL_ANGLE;
+                    isRotate = true;
+                }
             }
 
             if (isRotate)
@@ -89,6 +102,7 @@ public class Stick : PartOfPlatform
 
     #endregion
 
+
     #region Event handlers
 
     private void Stick_OnStickFallDown()
@@ -100,6 +114,48 @@ public class Stick : PartOfPlatform
         }
     }
 
+
+    private void Stick_OnPlayerStartHorizontalMovement()
+    {
+        isLock = true;
+    }
+
+
+    private void Stick_OnPlatformEndMovement()
+    {
+        isLock = false;
+    }
+
+
+    private void Stick_OnEndGame()
+    {
+        isLock = true;
+    }
+
+
+    private void Stick_OnReloadGame()
+    {
+        isLock = false;
+        
+        RefreshStick();
+    }
+
+    #endregion
+
+
+    #region Private methods
+
+    private void RefreshStick()
+    {
+        isRotate = false;
+
+        scale = Vector2.right;
+        transform.localScale = scale;
+
+        currentRotation.z = 0;
+        transform.localEulerAngles = currentRotation;
+    }
+
     #endregion
 
 
@@ -107,11 +163,7 @@ public class Stick : PartOfPlatform
     {
         if (state == States.Behind)
         {
-            scale = Vector2.right;
-            transform.localScale = scale;
-
-            currentRotation.z = 0;
-            transform.localEulerAngles = currentRotation;
+            RefreshStick();
         }
         else if (state == States.Front)
         {

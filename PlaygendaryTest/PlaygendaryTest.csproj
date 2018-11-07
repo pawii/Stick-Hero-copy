@@ -81,10 +81,11 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Background.cs" />
     <Compile Include="Assets\Scripts\BlackRectangle.cs" />
+    <Compile Include="Assets\Scripts\Managers\PlatformManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\ScoreManager.cs" />
     <Compile Include="Assets\Scripts\MovementState.cs" />
     <Compile Include="Assets\Scripts\PartOfPlatform.cs" />
     <Compile Include="Assets\Scripts\Platform.cs" />
-    <Compile Include="Assets\Scripts\PlatformManager.cs" />
     <Compile Include="Assets\Scripts\PlatformState\BehindPlatform.cs" />
     <Compile Include="Assets\Scripts\PlatformState\CenterPlatform.cs" />
     <Compile Include="Assets\Scripts\PlatformState\FrontPlatform.cs" />
@@ -94,6 +95,8 @@
     <Compile Include="Assets\Scripts\RedSquare.cs" />
     <Compile Include="Assets\Scripts\Score.cs" />
     <Compile Include="Assets\Scripts\Stick.cs" />
+    <Compile Include="Assets\Scripts\UI\EndMenu.cs" />
+    <Compile Include="Assets\Scripts\UI\ScoreDuringGame.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

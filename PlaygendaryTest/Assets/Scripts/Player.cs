@@ -8,6 +8,9 @@ public class Player : MonoBehaviour
     public static event Action OnMoveNext;
     public static event Action OnStickFallDown;
     public static event Action OnScoreUp;
+    public static event Action OnPlayerStartHorizontalMovement;
+    public static event Action OnPlayerEndHorizontalMovement;
+    public static event Action OnEndGame;
 
 
     [SerializeField]
@@ -40,12 +43,14 @@ public class Player : MonoBehaviour
         playerPos = StartPos;
 
         Stick.OnStickFallHorizontal += Player_OnStickFallHorizontal;
+        EndMenu.OnReloadGame += Player_OnReloadGame;
     }
 
 
     private void OnDestroy()
     {
         Stick.OnStickFallHorizontal -= Player_OnStickFallHorizontal;
+        EndMenu.OnReloadGame -= Player_OnReloadGame;
     }
 
 
@@ -61,9 +66,23 @@ public class Player : MonoBehaviour
 
                 isMove = false;
 
+                if (isContinueMove && isFall)
+                {
+                    OnPlayerEndHorizontalMovement();
+                }
+
                 if (!isContinueMove)
                 {
                     anim.SetBool("isRun", false);
+
+                    if (!isFall)
+                    {
+                        OnPlayerEndHorizontalMovement();
+                    }
+                    else
+                    {
+                        OnEndGame();
+                    }
                 }
             }
 
@@ -109,8 +128,6 @@ public class Player : MonoBehaviour
 
     private void StartMove(Vector2 targetPosition, float movementTime, bool isFall)
     {
-        anim.SetBool("isRun", true);
-
         this.targetPosition = targetPosition;
         this.movementTime = movementTime;
         this.isFall = isFall;
@@ -120,13 +137,17 @@ public class Player : MonoBehaviour
         fraction = 0;
         isMove = true;
         isContinueMove = true;
+
+        anim.SetBool("isRun", true);
+
+        OnPlayerStartHorizontalMovement();
     }
 
     #endregion
 
 
     #region Event handlers
-        
+
     private void Player_OnStickFallHorizontal(float stickSize)
     {
         float endOfPlatform = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
@@ -154,6 +175,13 @@ public class Player : MonoBehaviour
         }
 
         StartMove(targetPosition, movementTime, isFall);
+    }
+
+
+    private void Player_OnReloadGame()
+    {
+        playerPos = StartPos;
+        transform.position = StartPos;
     }
 
     #endregion

@@ -1,11 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Platform : MonoBehaviour
 {
     [SerializeField]
     private States startState;
+
+
+    public static event Action OnPlatformEndMovement;
 
 
     public IPlatformState State { get; set; }
@@ -51,11 +55,13 @@ public class Platform : MonoBehaviour
     {
         if (isMove)
         {
-            fraction = Mathf.Clamp01((Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME);
+            fraction = (Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME;
             if (fraction > 1f)
             {
                 fraction = 1;
                 isMove = false;
+
+                OnPlatformEndMovement();
             }
 
             transform.position = Vector2.Lerp(startPosition, targetPosition, fraction);

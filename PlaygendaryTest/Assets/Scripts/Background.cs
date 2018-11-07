@@ -6,38 +6,61 @@ public class Background : MonoBehaviour
 {
     [SerializeField]
     private float moveSpeed;
+    [SerializeField]
+    private float width;
 
 
-    private Vector2 pos;
+    private Vector2 position;
+    private bool isMove;
 
 
     #region Unity lifecycle
 
     private void Awake()
     {
-        pos = transform.position;
+        position = transform.position;
+        isMove = false;
 
+        Player.OnPlayerStartHorizontalMovement += Background_OnPlayerStartHorizontalMovement;
+        Player.OnPlayerEndHorizontalMovement += Background_OnPlayerEndHorizontalMovement;
     }
 
 
     private void OnDestroy()
     {
-        
+        Player.OnPlayerStartHorizontalMovement -= Background_OnPlayerStartHorizontalMovement;
+        Player.OnPlayerEndHorizontalMovement -= Background_OnPlayerEndHorizontalMovement;
+    }
+
+
+    private void Update()
+    {
+        if (isMove)
+        {
+            position.x -= moveSpeed * Time.deltaTime;
+            if (position.x < -width)
+            {
+                position.x = width;
+            }
+
+            transform.localPosition = position;
+        }
     }
 
     #endregion
 
 
-    #region Private methods
+    #region Event handlers
 
-    private IEnumerator Move()
+    private void Background_OnPlayerStartHorizontalMovement()
     {
-        while (true)
-        {
-            pos.x += moveSpeed * Time.deltaTime;
-            
-            yield return null;
-        }
+        isMove = true;
+    }
+
+
+    private void Background_OnPlayerEndHorizontalMovement()
+    {
+        isMove = false;
     }
 
     #endregion
