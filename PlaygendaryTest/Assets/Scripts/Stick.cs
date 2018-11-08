@@ -13,6 +13,8 @@ public class Stick : PartOfPlatform
     public static event Action<float> OnStickFallHorizontal;
 
 
+    #region Fields
+
     [SerializeField]
     private float growSpeed;
     [SerializeField]
@@ -27,6 +29,8 @@ public class Stick : PartOfPlatform
     private Vector3 endRotation;
     private Vector3 scale;
 
+    #endregion
+
 
     #region Unity lifecycle
 
@@ -38,9 +42,7 @@ public class Stick : PartOfPlatform
         base.Awake();
         StartMenu.OnStartGame += Stick_OnStartGame;
         Player.OnStickFallDown += Stick_OnStickFallDown;
-        Player.OnPlayerStartHorizontalMovement += Stick_OnPlayerStartHorizontalMovement;
         Platform.OnPlatformEndMovement += Stick_OnPlatformEndMovement;
-        Player.OnEndGame += Stick_OnEndGame;
         EndMenu.OnReloadGame += Stick_OnReloadGame;
     }
 
@@ -50,9 +52,7 @@ public class Stick : PartOfPlatform
         base.OnDestroy();
         StartMenu.OnStartGame -= Stick_OnStartGame;
         Player.OnStickFallDown -= Stick_OnStickFallDown;
-        Player.OnPlayerStartHorizontalMovement -= Stick_OnPlayerStartHorizontalMovement;
         Platform.OnPlatformEndMovement -= Stick_OnPlatformEndMovement;
-        Player.OnEndGame -= Stick_OnEndGame;
         EndMenu.OnReloadGame -= Stick_OnReloadGame;
     }
 
@@ -119,21 +119,9 @@ public class Stick : PartOfPlatform
     }
 
 
-    private void Stick_OnPlayerStartHorizontalMovement()
-    {
-        isLock = true;
-    }
-
-
     private void Stick_OnPlatformEndMovement()
     {
         isLock = false;
-    }
-
-
-    private void Stick_OnEndGame()
-    {
-        isLock = true;
     }
 
 

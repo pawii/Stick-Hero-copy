@@ -6,13 +6,13 @@ using System;
 
 public class EndMenu : MonoBehaviour
 {
+    public static event Action OnReloadGame;
+
+
     [SerializeField]
     private Text countScoreText;
     [SerializeField]
     private Text countBestScoreText;
-
-
-    public static event Action OnReloadGame;
 
 
     #region Unity lifecycle

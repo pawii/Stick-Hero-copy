@@ -13,20 +13,21 @@ public class Player : MonoBehaviour
     public static event Action OnEndGame;
 
 
+    #region Fields
+
     [SerializeField]
     private Animator anim;
     [SerializeField]
     private float playerSpeed;
     [SerializeField]
     private float playerFallSpeed;
+    [SerializeField]
+    private AudioSource fallAudio;
 
 
-    public static Vector2 StartPos { get; private set; }
-
-    
-    private Vector2 playerPos;
-    private Vector2 statrPosition;
-    private Vector2 targetPosition;
+    private Vector2 playerPosition;
+    private Vector2 statrMovementPosition;
+    private Vector2 targetMovementPosition;
     private float fraction;
     private float startTime;
     private float movementTime;
@@ -34,13 +35,18 @@ public class Player : MonoBehaviour
     private bool isFall;
     private bool isContinueMove;
 
+    #endregion
+
+
+    public static Vector2 StartPosition { get; private set; }
+
 
     #region Unity lifecycle
 
     private void Awake()
     {
-        StartPos = new Vector2(-5, 0.42f);
-        playerPos = transform.position;
+        StartPosition = new Vector2(-5, 0.42f);
+        playerPosition = transform.position;
 
         StartMenu.OnStartGame += Player_OnReloadGame;
         Stick.OnStickFallHorizontal += Player_OnStickFallHorizontal;
@@ -84,12 +90,13 @@ public class Player : MonoBehaviour
                     else
                     {
                         OnEndGame();
+                        fallAudio.Play();
                     }
                 }
             }
 
-            playerPos = Vector2.Lerp(statrPosition, targetPosition, fraction);
-            transform.position = playerPos;
+            playerPosition = Vector2.Lerp(statrMovementPosition, targetMovementPosition, fraction);
+            transform.position = playerPosition;
 
             if (!isMove && isContinueMove)
             {
@@ -97,8 +104,8 @@ public class Player : MonoBehaviour
                 {
                     OnStickFallDown();
 
-                    targetPosition = playerPos;
-                    targetPosition.y -= 10;
+                    targetMovementPosition = playerPosition;
+                    targetMovementPosition.y -= 10;
                     movementTime = PlatformManager.MOVE_TIME;
 
                     anim.SetBool("isRun", false);
@@ -108,12 +115,12 @@ public class Player : MonoBehaviour
                     OnScoreUp();
                     OnMoveNext();
 
-                    targetPosition = StartPos;
+                    targetMovementPosition = StartPosition;
                     movementTime = PlatformManager.MOVE_TIME;
 
                 }
 
-                statrPosition = playerPos;
+                statrMovementPosition = playerPosition;
                 startTime = Time.realtimeSinceStartup;
                 fraction = 0;
 
@@ -126,14 +133,54 @@ public class Player : MonoBehaviour
     #endregion
 
 
+    #region Event handlers
+
+    private void Player_OnStickFallHorizontal(float stickSize)
+    {
+        float endOfPlatform = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
+        bool isFall = (stickSize < PlatformManager.NewDistance) || stickSize > endOfPlatform;
+
+        Vector2 targetPosition = StartPosition;
+        float movementTime;
+
+        if (isFall)
+        {
+            targetPosition.x += stickSize;
+            movementTime = stickSize / playerSpeed;
+        }
+        else
+        {
+            targetPosition.x += PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
+            movementTime = (PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth) / playerSpeed;
+
+            float startRedSquare = PlatformManager.NewDistance + (PlatformManager.BehindPlatformWidth / 2f) - (RedSquare.Width / 2f);
+            float endRedSquare = startRedSquare + RedSquare.Width;
+            if (stickSize > startRedSquare && stickSize < endRedSquare)
+            {
+                OnScoreUp();
+            }
+        }
+
+        StartHorizontalMove(targetPosition, movementTime, isFall);
+    }
+
+
+    private void Player_OnReloadGame()
+    {
+        StartMove(StartPosition, PlatformManager.MOVE_TIME);
+    }
+
+    #endregion
+
+
     #region Private methods
 
     private void StartMove(Vector2 targetPosition, float movementTime)
     {
-        this.targetPosition = targetPosition;
+        this.targetMovementPosition = targetPosition;
         this.movementTime = movementTime;
 
-        statrPosition = playerPos;
+        statrMovementPosition = playerPosition;
         startTime = Time.realtimeSinceStartup;
         fraction = 0;
         isMove = true;
@@ -147,52 +194,11 @@ public class Player : MonoBehaviour
         StartMove(targetPosition, movementTime);
 
         this.isFall = isFall;
-        
         isContinueMove = true;
 
         anim.SetBool("isRun", true);
 
         OnPlayerStartHorizontalMovement();
-    }
-
-    #endregion
-
-
-    #region Event handlers
-
-    private void Player_OnStickFallHorizontal(float stickSize)
-    {
-        float endOfPlatform = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
-        bool isFall = stickSize < PlatformManager.NewDistance || stickSize > endOfPlatform;
-
-        Vector2 targetPosition = StartPos;
-        float movementTime = 1f;
-
-        if (isFall)
-        {
-            targetPosition.x += stickSize;
-            movementTime = stickSize / playerSpeed;
-        }
-        else
-        {
-            targetPosition.x += PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
-            movementTime = (PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth) / playerSpeed;
-
-            float startRedSquare = PlatformManager.NewDistance + (PlatformManager.BehindPlatformWidth / 2f) - 0.25f;
-            float endRedSquare = startRedSquare + 0.5f;
-            if (stickSize > startRedSquare && stickSize < endRedSquare)
-            {
-                OnScoreUp();
-            }
-        }
-
-        StartHorizontalMove(targetPosition, movementTime, isFall);
-    }
-
-
-    private void Player_OnReloadGame()
-    {
-        StartMove(StartPos, PlatformManager.MOVE_TIME);
     }
 
     #endregion

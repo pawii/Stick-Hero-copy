@@ -5,14 +5,11 @@ using System;
 
 public class Platform : MonoBehaviour
 {
-    [SerializeField]
-    private States startState;
-
-
     public static event Action OnPlatformEndMovement;
 
 
-    public IPlatformState State { get; set; }
+    [SerializeField]
+    private States startState;
 
 
     private bool isMove;
@@ -20,6 +17,9 @@ public class Platform : MonoBehaviour
     private Vector2 targetPosition;
     private float startTime;
     private float fraction;
+
+
+    public IPlatformState State { get; set; }
 
 
     #region Unity lifecycle

@@ -18,7 +18,7 @@ public abstract class PartOfPlatform : MonoBehaviour
 
     protected void OnDestroy()
     {
-        PlatformManager.OnMovePlatform += PartOfPlatform_OnMovePlatform;
+        PlatformManager.OnMovePlatform -= PartOfPlatform_OnMovePlatform;
     }
 
     #endregion

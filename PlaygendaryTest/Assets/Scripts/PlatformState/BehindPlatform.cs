@@ -12,19 +12,13 @@ public class BehindPlatform : IPlatformState
         platform.transform.position = new Vector2(10, 0);
 
         Vector2 targetPos = Vector2.zero;
-        targetPos.x += Player.StartPos.x + PlatformManager.CENTER_PLATFORM_OFFSET;
+        targetPos.x += Player.StartPosition.x + PlatformManager.CENTER_PLATFORM_OFFSET;
         targetPos.x += PlatformManager.BehindPlatformWidth / 2f;
         targetPos.x += PlatformManager.NewDistance;
 
         platform.State = new FrontPlatform();
 
         return targetPos;
-    }
-
-
-    public Vector2 RefreshPlatform()
-    {
-        throw new NotImplementedException();
     }
 
     #endregion

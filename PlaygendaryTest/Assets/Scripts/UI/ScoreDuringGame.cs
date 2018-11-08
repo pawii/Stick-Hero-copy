@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class ScoreDuringGame : MonoBehaviour
 {
     [SerializeField]
-    Text scoreText;
+    private Text scoreText;
     [SerializeField]
-    AudioSource audio;
+    private AudioSource audio;
 
 
     private int score;

@@ -42,7 +42,7 @@ public class ScoreManager : MonoBehaviour
     {
         Player.OnScoreUp -= ScoreManager_OnScoreUp;
         Player.OnEndGame -= ScoreManager_OnEndGame;
-        EndMenu.OnReloadGame += ScoreManager_OnReloadGame;
+        EndMenu.OnReloadGame -= ScoreManager_OnReloadGame;
     }
 
     #endregion
@@ -52,7 +52,7 @@ public class ScoreManager : MonoBehaviour
 
     private void ScoreManager_OnScoreUp()
     {
-        CurrentScore++;
+        CurrentScore ++;
         if (CurrentScore > BestScore)
         {
             BestScore = CurrentScore;

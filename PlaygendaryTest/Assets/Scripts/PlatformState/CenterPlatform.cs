@@ -10,7 +10,7 @@ public class CenterPlatform : IPlatformState
     public Vector2 MovePlatform(Platform platform)
     {
         Vector2 targetPos = Vector2.zero;
-        targetPos.x = Player.StartPos.x + PlatformManager.CENTER_PLATFORM_OFFSET;
+        targetPos.x = Player.StartPosition.x + PlatformManager.CENTER_PLATFORM_OFFSET;
         targetPos.x -= PlatformManager.CenterPlatformWidth / 2f;
         targetPos.x -= PlatformManager.FontPlatformWidth;
         targetPos.x -= PlatformManager.OldDistance;
@@ -18,12 +18,6 @@ public class CenterPlatform : IPlatformState
         platform.State = new BehindPlatform();
 
         return targetPos;
-    }
-
-
-    public Vector2 RefreshPlatform()
-    {
-        throw new NotImplementedException();
     }
 
     #endregion
