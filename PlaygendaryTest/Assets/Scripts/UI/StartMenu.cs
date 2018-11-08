@@ -21,6 +21,7 @@ public class StartMenu : MonoBehaviour
     private void Awake()
     {
         isAudioPaused = false;
+        AudioListener.pause = isAudioPaused;
         soundButtonText.text = "Sound on";
     }
 

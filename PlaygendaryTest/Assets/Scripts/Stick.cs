@@ -33,9 +33,10 @@ public class Stick : PartOfPlatform
     private new void Awake()
     {
         scale = Vector2.right;
-        isLock = false;
+        isLock = true;
 
         base.Awake();
+        StartMenu.OnStartGame += Stick_OnStartGame;
         Player.OnStickFallDown += Stick_OnStickFallDown;
         Player.OnPlayerStartHorizontalMovement += Stick_OnPlayerStartHorizontalMovement;
         Platform.OnPlatformEndMovement += Stick_OnPlatformEndMovement;
@@ -47,7 +48,8 @@ public class Stick : PartOfPlatform
     private new void OnDestroy()
     {
         base.OnDestroy();
-        Player.OnStickFallDown += Stick_OnStickFallDown;
+        StartMenu.OnStartGame -= Stick_OnStartGame;
+        Player.OnStickFallDown -= Stick_OnStickFallDown;
         Player.OnPlayerStartHorizontalMovement -= Stick_OnPlayerStartHorizontalMovement;
         Platform.OnPlatformEndMovement -= Stick_OnPlatformEndMovement;
         Player.OnEndGame -= Stick_OnEndGame;
@@ -78,6 +80,7 @@ public class Stick : PartOfPlatform
 
                     endRotation.z = FALL_HORIZONTAL_ANGLE;
                     isRotate = true;
+                    isLock = true;
                 }
             }
 
@@ -139,6 +142,12 @@ public class Stick : PartOfPlatform
         isLock = false;
         
         RefreshStick();
+    }
+
+
+    private void Stick_OnStartGame()
+    {
+        isLock = false;
     }
 
     #endregion

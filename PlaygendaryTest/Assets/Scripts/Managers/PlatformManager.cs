@@ -40,12 +40,16 @@ public class PlatformManager : MonoBehaviour
         BehindPlatformWidth = 1;
 
         Player.OnMoveNext += PlatformManager_OnMoveNext;
+        StartMenu.OnStartGame += PlatformManager_OnMoveNext;
+        EndMenu.OnReloadGame += PlatformManager_OnMoveNext;
     }
 
 
     private void OnDestroy()
     {
         Player.OnMoveNext -= PlatformManager_OnMoveNext;
+        StartMenu.OnStartGame -= PlatformManager_OnMoveNext;
+        EndMenu.OnReloadGame -= PlatformManager_OnMoveNext;
     }
 
     #endregion

@@ -39,9 +39,10 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        StartPos = transform.position;
-        playerPos = StartPos;
+        StartPos = new Vector2(-5, 0.42f);
+        playerPos = transform.position;
 
+        StartMenu.OnStartGame += Player_OnReloadGame;
         Stick.OnStickFallHorizontal += Player_OnStickFallHorizontal;
         EndMenu.OnReloadGame += Player_OnReloadGame;
     }
@@ -49,6 +50,7 @@ public class Player : MonoBehaviour
 
     private void OnDestroy()
     {
+        StartMenu.OnStartGame -= Player_OnReloadGame;
         Stick.OnStickFallHorizontal -= Player_OnStickFallHorizontal;
         EndMenu.OnReloadGame -= Player_OnReloadGame;
     }
@@ -126,16 +128,26 @@ public class Player : MonoBehaviour
 
     #region Private methods
 
-    private void StartMove(Vector2 targetPosition, float movementTime, bool isFall)
+    private void StartMove(Vector2 targetPosition, float movementTime)
     {
         this.targetPosition = targetPosition;
         this.movementTime = movementTime;
-        this.isFall = isFall;
 
         statrPosition = playerPos;
         startTime = Time.realtimeSinceStartup;
         fraction = 0;
         isMove = true;
+        isFall = false;
+        isContinueMove = false;
+    }
+
+
+    private void StartHorizontalMove(Vector2 targetPosition, float movementTime, bool isFall)
+    {
+        StartMove(targetPosition, movementTime);
+
+        this.isFall = isFall;
+        
         isContinueMove = true;
 
         anim.SetBool("isRun", true);
@@ -174,14 +186,13 @@ public class Player : MonoBehaviour
             }
         }
 
-        StartMove(targetPosition, movementTime, isFall);
+        StartHorizontalMove(targetPosition, movementTime, isFall);
     }
 
 
     private void Player_OnReloadGame()
     {
-        playerPos = StartPos;
-        transform.position = StartPos;
+        StartMove(StartPos, PlatformManager.MOVE_TIME);
     }
 
     #endregion
