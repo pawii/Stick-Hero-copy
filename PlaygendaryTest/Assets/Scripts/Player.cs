@@ -22,6 +22,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float playerFallSpeed;
     [SerializeField]
+    private float playerFallDistance;
+    [SerializeField]
     private AudioSource fallAudio;
 
 
@@ -32,8 +34,7 @@ public class Player : MonoBehaviour
     private float startTime;
     private float movementTime;
     private bool isMove;
-    private bool isFall;
-    private bool isContinueMove;
+    private PlayerMovementState movementState;
 
     #endregion
 
@@ -47,6 +48,7 @@ public class Player : MonoBehaviour
     {
         StartPosition = new Vector2(-5, 0.42f);
         playerPosition = transform.position;
+        movementState = PlayerMovementState.TwoPoint;
 
         StartMenu.OnStartGame += Player_OnReloadGame;
         Stick.OnStickFallHorizontal += Player_OnStickFallHorizontal;
@@ -74,59 +76,35 @@ public class Player : MonoBehaviour
 
                 isMove = false;
 
-                if (isContinueMove && isFall)
+                switch (movementState)
                 {
-                    OnPlayerEndHorizontalMovement();
-                }
-
-                if (!isContinueMove)
-                {
-                    anim.SetBool("isRun", false);
-
-                    if (!isFall)
-                    {
+                    case PlayerMovementState.Horizontal:
+                        OnScoreUp();
+                        OnMoveNext();
                         OnPlayerEndHorizontalMovement();
-                    }
-                    else
-                    {
+                        StartMove(StartPosition, PlatformManager.MOVE_TIME, PlayerMovementState.Back);
+                        break;
+
+                    case PlayerMovementState.FallHorizontal:
+                        OnPlayerEndHorizontalMovement();
+                        OnStickFallDown();
+                        targetMovementPosition = playerPosition;
+                        targetMovementPosition.y -= playerFallDistance;
+                        float movementTime = playerFallDistance / playerFallSpeed;
+                        StartMove(targetMovementPosition, movementTime, PlayerMovementState.FallDown);
+                        break;
+
+                    case PlayerMovementState.FallDown:
                         OnEndGame();
                         fallAudio.Play();
-                    }
+                        break;
                 }
+
+                anim.SetBool("isRun", false);
             }
 
             playerPosition = Vector2.Lerp(statrMovementPosition, targetMovementPosition, fraction);
             transform.position = playerPosition;
-
-            if (!isMove && isContinueMove)
-            {
-                if (isFall)
-                {
-                    OnStickFallDown();
-
-                    targetMovementPosition = playerPosition;
-                    targetMovementPosition.y -= 10;
-                    movementTime = PlatformManager.MOVE_TIME;
-
-                    anim.SetBool("isRun", false);
-                }
-                else
-                {
-                    OnScoreUp();
-                    OnMoveNext();
-
-                    targetMovementPosition = StartPosition;
-                    movementTime = PlatformManager.MOVE_TIME;
-
-                }
-
-                statrMovementPosition = playerPosition;
-                startTime = Time.realtimeSinceStartup;
-                fraction = 0;
-
-                isMove = true;
-                isContinueMove = false;
-            }
         }
     }
 
@@ -139,12 +117,17 @@ public class Player : MonoBehaviour
     {
         float endOfPlatform = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
         bool isFall = (stickSize < PlatformManager.NewDistance) || stickSize > endOfPlatform;
+        movementState = isFall ? PlayerMovementState.FallHorizontal : PlayerMovementState.Horizontal;
 
         Vector2 targetPosition = StartPosition;
         float movementTime;
 
         if (isFall)
         {
+            if (stickSize > 15)
+            {
+                stickSize = 15;
+            }
             targetPosition.x += stickSize;
             movementTime = stickSize / playerSpeed;
         }
@@ -160,14 +143,15 @@ public class Player : MonoBehaviour
                 OnScoreUp();
             }
         }
-
-        StartHorizontalMove(targetPosition, movementTime, isFall);
+        
+        OnPlayerStartHorizontalMovement();
+        StartMove(targetPosition, movementTime, movementState);
     }
 
 
     private void Player_OnReloadGame()
     {
-        StartMove(StartPosition, PlatformManager.MOVE_TIME);
+        StartTwoPointMove(StartPosition, PlatformManager.MOVE_TIME);
     }
 
     #endregion
@@ -175,7 +159,7 @@ public class Player : MonoBehaviour
 
     #region Private methods
 
-    private void StartMove(Vector2 targetPosition, float movementTime)
+    private void StartTwoPointMove(Vector2 targetPosition, float movementTime)
     {
         this.targetMovementPosition = targetPosition;
         this.movementTime = movementTime;
@@ -184,21 +168,17 @@ public class Player : MonoBehaviour
         startTime = Time.realtimeSinceStartup;
         fraction = 0;
         isMove = true;
-        isFall = false;
-        isContinueMove = false;
+        movementState = PlayerMovementState.TwoPoint;
     }
 
 
-    private void StartHorizontalMove(Vector2 targetPosition, float movementTime, bool isFall)
+    private void StartMove(Vector2 targetPosition, float movementTime, PlayerMovementState movementState)
     {
-        StartMove(targetPosition, movementTime);
+        StartTwoPointMove(targetPosition, movementTime);
 
-        this.isFall = isFall;
-        isContinueMove = true;
+        this.movementState = movementState;
 
         anim.SetBool("isRun", true);
-
-        OnPlayerStartHorizontalMovement();
     }
 
     #endregion

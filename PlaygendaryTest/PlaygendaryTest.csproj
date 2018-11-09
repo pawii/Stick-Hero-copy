@@ -91,6 +91,7 @@
     <Compile Include="Assets\Scripts\PlatformState\IPlatformState.cs" />
     <Compile Include="Assets\Scripts\PlatformState\States.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
+    <Compile Include="Assets\Scripts\PlayerMovementState.cs" />
     <Compile Include="Assets\Scripts\RedSquare.cs" />
     <Compile Include="Assets\Scripts\Stick.cs" />
     <Compile Include="Assets\Scripts\UI\EndMenu.cs" />

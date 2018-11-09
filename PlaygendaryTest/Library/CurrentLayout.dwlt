@@ -109,7 +109,7 @@ MonoBehaviour:
   m_MinSize: {x: 683, y: 495}
   m_MaxSize: {x: 14004, y: 14045}
   vertical: 0
-  controlID: 4007
+  controlID: 4654
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -133,7 +133,7 @@ MonoBehaviour:
   m_MinSize: {x: 406, y: 495}
   m_MaxSize: {x: 10002, y: 14045}
   vertical: 1
-  controlID: 4008
+  controlID: 4655
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -157,7 +157,7 @@ MonoBehaviour:
   m_MinSize: {x: 406, y: 224}
   m_MaxSize: {x: 8006, y: 4024}
   vertical: 0
-  controlID: 4009
+  controlID: 4656
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -367,9 +367,9 @@ MonoBehaviour:
     height: 332
   m_TreeViewState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: e2fbffff
-    m_LastClickedID: -1054
-    m_ExpandedIDs: 7afbffff7efbffffd0fbffffd2fbffffd4fbffffd6fbffffe4fbffffe6fbffff0000000070260000
+    m_SelectedIDs: 9c250000
+    m_LastClickedID: 0
+    m_ExpandedIDs: 526bffffd26bffff966cffffe6fbffff000000004c490000424a0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -419,14 +419,14 @@ MonoBehaviour:
     width: 747
     height: 332
   m_SceneLighting: 1
-  lastFramingTime: 670.4151769938742
+  lastFramingTime: 4705.127781387502
   m_2DMode: 1
   m_isRotationLocked: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: -5.8589697, y: -2.577806, z: 4.3867188}
+    m_Target: {x: -18.211676, y: 0.49787006, z: 0}
     speed: 2
-    m_Value: {x: -5.8589697, y: -2.577806, z: 4.3867188}
+    m_Value: {x: -18.211676, y: 0.49787006, z: 0}
   m_RenderMode: 0
   m_ValidateTrueMetals: 0
   m_SceneViewState:
@@ -453,9 +453,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 14.61973
+    m_Target: 2.0177248
     speed: 2
-    m_Value: 14.61973
+    m_Value: 2.0177248
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -542,13 +542,13 @@ MonoBehaviour:
     serializedVersion: 2
     x: 246
     y: 92
-    width: 748
+    width: 747
     height: 332
   m_ViewPositions:
     m_KeySerializationHelper:
     - {fileID: 1107664450742595112, guid: 1ce0ae4260594c049b95ad3d7ef096c3, type: 2}
     m_ValueSerializationHelper:
-    - {x: 501.80002, y: 120.20001}
+    - {x: 398.2, y: 199.20001}
   m_PreviewAnimator: {fileID: 0}
   m_AnimatorController: {fileID: 0}
   m_BreadCrumbs: []
@@ -600,18 +600,18 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Audio
+    - Assets
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Audio
+  - Assets
   m_LastFoldersGridSize: -1
   m_LastProjectPath: "C:\\Users\\pawii\\Desktop\\\u0423\u0447\u0435\u0431\u0430\\Playgendary\\PlaygendaryTest"
   m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: fc240000
-    m_LastClickedID: 9468
+    m_SelectedIDs: c8240000
+    m_LastClickedID: 9416
     m_ExpandedIDs: 00000000c8240000102500002225000090250000ffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -667,8 +667,8 @@ MonoBehaviour:
   m_ListAreaState:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 0
-    m_ExpandedInstanceIDs: c62300006e410000c863000002260000c02e00000c41000000000000a43c0000ae3c000014aefbff30260000aa33000046250000a0260000
+    m_HadKeyboardFocusLastEvent: 1
+    m_ExpandedInstanceIDs: c62300006e410000c863000002260000c02e00000c41000000000000a43c0000ae3c000014aefbff30260000aa330000a0260000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
