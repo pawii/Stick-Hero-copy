@@ -1,32 +1,32 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Background : MonoBehaviour
 {
+    private static float Width;
+
+
     [SerializeField]
-    private float moveSpeed;
-    [SerializeField]
-    private float width;
+    private float movingSpeed;
 
 
     private Vector2 position;
-    private bool isMove;
+    private bool isMoving;
 
 
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
         position = transform.position;
-        isMove = false;
+        isMoving = false;
+        Width = transform.localScale.x;
 
         Player.OnPlayerStartHorizontalMovement += Background_OnPlayerStartHorizontalMovement;
         Player.OnPlayerEndHorizontalMovement += Background_OnPlayerEndHorizontalMovement;
     }
 
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         Player.OnPlayerStartHorizontalMovement -= Background_OnPlayerStartHorizontalMovement;
         Player.OnPlayerEndHorizontalMovement -= Background_OnPlayerEndHorizontalMovement;
@@ -35,12 +35,12 @@ public class Background : MonoBehaviour
 
     private void Update()
     {
-        if (isMove)
+        if (isMoving)
         {
-            position.x -= moveSpeed * Time.deltaTime;
-            if (position.x < -width)
+            position.x -= movingSpeed * Time.deltaTime;
+            if (position.x < -Width)
             {
-                position.x = width;
+                position.x = Width;
             }
 
             transform.localPosition = position;
@@ -54,13 +54,13 @@ public class Background : MonoBehaviour
 
     private void Background_OnPlayerStartHorizontalMovement()
     {
-        isMove = true;
+        isMoving = true;
     }
 
 
     private void Background_OnPlayerEndHorizontalMovement()
     {
-        isMove = false;
+        isMoving = false;
     }
 
     #endregion

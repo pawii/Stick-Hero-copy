@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 public class Platform : MonoBehaviour
@@ -12,11 +10,11 @@ public class Platform : MonoBehaviour
     private States startState;
 
 
-    private bool isMove;
-    private Vector2 startPosition;
-    private Vector2 targetPosition;
-    private float startTime;
-    private float fraction;
+    private bool isMoving;
+    private Vector2 startMovingPosition;
+    private Vector2 targetMovingPosition;
+    private float startMovingTime;
+    private float fractionCoefficient;
 
 
     public IPlatformState State { get; set; }
@@ -24,9 +22,9 @@ public class Platform : MonoBehaviour
 
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
-        isMove = false;
+        isMoving = false;
 
         switch (startState)
         {
@@ -45,7 +43,7 @@ public class Platform : MonoBehaviour
     }
 
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         PlatformManager.OnMovePlatform -= Platform_OnMovePlatform;
     }
@@ -53,18 +51,18 @@ public class Platform : MonoBehaviour
 
     private void Update()
     {
-        if (isMove)
+        if (isMoving)
         {
-            fraction = (Time.realtimeSinceStartup - startTime) / PlatformManager.MOVE_TIME;
-            if (fraction > 1f)
+            fractionCoefficient = (Time.realtimeSinceStartup - startMovingTime) / PlatformManager.PLATFORM_MOVING_TIME;
+            if (fractionCoefficient > MathConsts.MAX_FRACTION_COEFFICIENT)
             {
-                fraction = 1;
-                isMove = false;
+                fractionCoefficient = MathConsts.MAX_FRACTION_COEFFICIENT;
+                isMoving = false;
 
                 OnPlatformEndMovement();
             }
 
-            transform.position = Vector2.Lerp(startPosition, targetPosition, fraction);
+            transform.position = Vector2.Lerp(startMovingPosition, targetMovingPosition, fractionCoefficient);
         }
     }
 
@@ -75,11 +73,11 @@ public class Platform : MonoBehaviour
 
     private void Platform_OnMovePlatform()
     {
-        targetPosition = State.MovePlatform(this);
-        startPosition = transform.position;
-        startTime = Time.realtimeSinceStartup;
-        fraction = 0f;
-        isMove = true;
+        targetMovingPosition = State.MovePlatform(this);
+        startMovingPosition = transform.position;
+        startMovingTime = Time.realtimeSinceStartup;
+        fractionCoefficient = MathConsts.MIN_FRACTION_COEFFICIENT;
+        isMoving = true;
     }
 
     #endregion

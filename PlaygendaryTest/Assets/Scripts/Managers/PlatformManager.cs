@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 public class PlatformManager : MonoBehaviour
 {
-    public const float MOVE_TIME = 0.5f;
+    public const float PLATFORM_MOVING_TIME = 0.5f;
     public const float CENTER_PLATFORM_OFFSET = 0.3f;
 
 
@@ -13,17 +11,17 @@ public class PlatformManager : MonoBehaviour
 
 
     [SerializeField]
-    private float minDistance;
+    private float minPlatformDistance;
     [SerializeField]
-    private float maxDistance;
+    private float maxPlatformDistance;
     [SerializeField]
     private float minPlatformWidth;
     [SerializeField]
     private float maxPlatformWidth;
 
 
-    public static float OldDistance { get; private set; }  // дистанция между краями платформ
-    public static float NewDistance { get; private set; }  // (не между центрами)
+    public static float OldDistance { get; private set; }  // Distance between edges platforms
+    public static float NewDistance { get; private set; }  // (not between centers)
     public static float CenterPlatformWidth { get; private set; }
     public static float FontPlatformWidth { get; private set; }
     public static float BehindPlatformWidth { get; private set; }
@@ -31,7 +29,7 @@ public class PlatformManager : MonoBehaviour
 
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
         OldDistance = 4;
         NewDistance = 4;
@@ -45,7 +43,7 @@ public class PlatformManager : MonoBehaviour
     }
 
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         Player.OnMoveNext -= PlatformManager_OnMoveNext;
         StartMenu.OnStartGame -= PlatformManager_OnMoveNext;
@@ -60,7 +58,7 @@ public class PlatformManager : MonoBehaviour
     private void PlatformManager_OnMoveNext()
     {
         OldDistance = NewDistance;
-        NewDistance = UnityEngine.Random.Range(minDistance, maxDistance);
+        NewDistance = UnityEngine.Random.Range(minPlatformDistance, maxPlatformDistance);
 
         CenterPlatformWidth = FontPlatformWidth;
         FontPlatformWidth = BehindPlatformWidth;

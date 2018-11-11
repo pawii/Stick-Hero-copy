@@ -1,24 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
+﻿using UnityEngine;
 
 public class BehindPlatform : IPlatformState
 {
+    private Vector2 hidePosition = new Vector2(10, 0);
+
+
     #region IPlatformState
     
     public Vector2 MovePlatform(Platform platform)
     {
-        platform.transform.position = new Vector2(10, 0);
+        platform.transform.position = hidePosition;
 
-        Vector2 targetPos = Vector2.zero;
-        targetPos.x += Player.StartPosition.x + PlatformManager.CENTER_PLATFORM_OFFSET;
-        targetPos.x += PlatformManager.BehindPlatformWidth / 2f;
-        targetPos.x += PlatformManager.NewDistance;
+        Vector2 targetPosition = Vector2.zero;
+        targetPosition.x += Player.StartPosition.x + PlatformManager.CENTER_PLATFORM_OFFSET;
+        targetPosition.x += PlatformManager.BehindPlatformWidth * MathConsts.HALF_COEFFICIENT;
+        targetPosition.x += PlatformManager.NewDistance;
 
         platform.State = new FrontPlatform();
 
-        return targetPos;
+        return targetPosition;
     }
 
     #endregion

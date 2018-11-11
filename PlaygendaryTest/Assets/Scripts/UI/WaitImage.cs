@@ -1,22 +1,23 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WaitImage : MonoBehaviour
 {
+    private bool isEventSigned = false;
+
+
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
-        EndMenu.OnReloadGame += WaitImage_OnReloadGame;
+        if (!isEventSigned)
+        {
+            EndMenu.OnReloadGame += WaitImage_OnReloadGame;
 
-        gameObject.SetActive(false);
-    }
+            gameObject.SetActive(false);
 
-
-    private void OnDestroy()
-    {
-        EndMenu.OnReloadGame -= WaitImage_OnReloadGame;
+            isEventSigned = true;
+        }
     }
 
     #endregion
@@ -37,7 +38,7 @@ public class WaitImage : MonoBehaviour
 
     private IEnumerator Wait()
     {
-        yield return new WaitForSeconds(PlatformManager.MOVE_TIME);
+        yield return new WaitForSeconds(PlatformManager.PLATFORM_MOVING_TIME);
         gameObject.SetActive(false);
     }
 

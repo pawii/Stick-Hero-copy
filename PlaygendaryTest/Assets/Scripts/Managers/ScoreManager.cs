@@ -1,32 +1,30 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 public class ScoreManager : MonoBehaviour
 {
     public static uint CurrentScore { get; private set; }
-    public static uint BestScore // Не автоматическое свойство, потому что сериализуется
+    public static uint BestScore // Not authomatical property because serialized (Richter)
     {
         get
         {
-            return bestScore;
+            return _bestScore;
         }
         private set
         {
-            bestScore = value;
+            _bestScore = value;
         }
     }
 
 
     private string filename;
-    private static uint bestScore;
+    private static uint _bestScore;
 
 
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
         filename = Path.Combine(Application.persistentDataPath, "game.dat");
 
@@ -38,7 +36,7 @@ public class ScoreManager : MonoBehaviour
     }
 
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         Player.OnScoreUp -= ScoreManager_OnScoreUp;
         Player.OnEndGame -= ScoreManager_OnEndGame;
@@ -83,7 +81,7 @@ public class ScoreManager : MonoBehaviour
     {
         FileStream stream = File.Create(filename);
         BinaryFormatter formatter = new BinaryFormatter();
-        formatter.Serialize(stream, bestScore);
+        formatter.Serialize(stream, _bestScore);
         stream.Close();
     }
 
@@ -92,13 +90,13 @@ public class ScoreManager : MonoBehaviour
     {
         if (!File.Exists(filename))
         {
-            bestScore = 0;
+            _bestScore = 0;
             return;
         }
         
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream stream = File.Open(filename, FileMode.Open);
-        bestScore = (uint)formatter.Deserialize(stream);
+        _bestScore = (uint)formatter.Deserialize(stream);
         stream.Close();
     }
 

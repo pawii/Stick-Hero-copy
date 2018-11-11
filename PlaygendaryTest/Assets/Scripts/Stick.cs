@@ -1,30 +1,32 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
-using UnityEngine.EventSystems;
 
 public class Stick : PartOfPlatform
 {
-    private const int FALL_DOWN_ANGLE = -180;
-    private const int FALL_HORIZONTAL_ANGLE = -90;
+    private const int FALL_DOWN_END_ANGLE = -180;
+    private const int FALL_HORIZONTAL_END_ANGLE = -90;
+    private const int START_ROTATION = 0;
 
 
-    public static event Action<float> OnStickFallHorizontal;
+    public static event Action<float> OnStickFellHorizontal;
+
+
+    private static bool isLock;
 
 
     #region Fields
 
     [SerializeField]
+    private float maxSize;
+    [SerializeField]
     private float growSpeed;
     [SerializeField]
     private float rotationSpeed;
     [SerializeField]
-    private AudioSource audio;
+    private AudioSource growStickAudio;
 
 
-    private bool isLock;
-    private bool isRotate;
+    private bool isRotating;
     private Vector3 currentRotation;
     private Vector3 endRotation;
     private Vector3 scale;
@@ -34,24 +36,21 @@ public class Stick : PartOfPlatform
 
     #region Unity lifecycle
 
-    private new void Awake()
+    private new void OnEnable()
     {
         scale = Vector2.right;
         isLock = true;
 
-        base.Awake();
-        StartMenu.OnStartGame += Stick_OnStartGame;
-        Player.OnStickFallDown += Stick_OnStickFallDown;
+        base.OnEnable();
+        Player.OnStickStartFallDown += Stick_OnStickStartFallDown;
         Platform.OnPlatformEndMovement += Stick_OnPlatformEndMovement;
         EndMenu.OnReloadGame += Stick_OnReloadGame;
     }
 
 
-    private new void OnDestroy()
+    private void OnDisable()
     {
-        base.OnDestroy();
-        StartMenu.OnStartGame -= Stick_OnStartGame;
-        Player.OnStickFallDown -= Stick_OnStickFallDown;
+        Player.OnStickStartFallDown -= Stick_OnStickStartFallDown;
         Platform.OnPlatformEndMovement -= Stick_OnPlatformEndMovement;
         EndMenu.OnReloadGame -= Stick_OnReloadGame;
     }
@@ -61,41 +60,49 @@ public class Stick : PartOfPlatform
     {
         if (state == States.Center)
         {
-            if (!isLock && !EventSystem.current.IsPointerOverGameObject())
+            if (!isLock)
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    audio.Play();
+                    growStickAudio.Play();
                 }
 
                 if (Input.GetMouseButton(0))
                 {
                     scale.y += growSpeed * Time.deltaTime;
-                    transform.localScale = scale;
+
+                    if (scale.y > maxSize)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        transform.localScale = scale;
+                    }
                 }
 
                 if (Input.GetMouseButtonUp(0))
                 {
-                    audio.Stop();
+                    growStickAudio.Stop();
 
-                    endRotation.z = FALL_HORIZONTAL_ANGLE;
-                    isRotate = true;
+                    endRotation.z = FALL_HORIZONTAL_END_ANGLE;
+                    isRotating = true;
                     isLock = true;
                 }
             }
 
-            if (isRotate)
+            if (isRotating)
             {
                 currentRotation.z -= rotationSpeed * Time.deltaTime;
 
                 if (currentRotation.z < endRotation.z)
                 {
                     currentRotation.z = endRotation.z;
-                    isRotate = false;
+                    isRotating = false;
 
-                    if(currentRotation.z == FALL_HORIZONTAL_ANGLE)
+                    if(currentRotation.z == FALL_HORIZONTAL_END_ANGLE)
                     {
-                        OnStickFallHorizontal(transform.localScale.y);
+                        OnStickFellHorizontal(transform.localScale.y);
                     }
                 }
 
@@ -109,12 +116,12 @@ public class Stick : PartOfPlatform
 
     #region Event handlers
 
-    private void Stick_OnStickFallDown()
+    private void Stick_OnStickStartFallDown()
     {
         if (state == States.Center)
         {
-            endRotation.z = FALL_DOWN_ANGLE;
-            isRotate = true;
+            endRotation.z = FALL_DOWN_END_ANGLE;
+            isRotating = true;
         }
     }
 
@@ -127,15 +134,7 @@ public class Stick : PartOfPlatform
 
     private void Stick_OnReloadGame()
     {
-        isLock = false;
-        
         RefreshStick();
-    }
-
-
-    private void Stick_OnStartGame()
-    {
-        isLock = false;
     }
 
     #endregion
@@ -145,12 +144,12 @@ public class Stick : PartOfPlatform
 
     private void RefreshStick()
     {
-        isRotate = false;
+        isRotating = false;
 
         scale = Vector2.right;
         transform.localScale = scale;
 
-        currentRotation.z = 0;
+        currentRotation.z = START_ROTATION;
         transform.localEulerAngles = currentRotation;
     }
 
@@ -165,9 +164,9 @@ public class Stick : PartOfPlatform
         }
         else if (state == States.Front)
         {
-            Vector2 newPos = Vector2.zero;
-            newPos.x += PlatformManager.FontPlatformWidth / 2f;
-            transform.localPosition = newPos;
+            Vector2 targetPosition = Vector2.zero;
+            targetPosition.x += PlatformManager.FontPlatformWidth * MathConsts.HALF_COEFFICIENT;
+            transform.localPosition = targetPosition;
         }
     }
 }

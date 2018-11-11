@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class ScoreDuringGame : MonoBehaviour
@@ -8,33 +6,30 @@ public class ScoreDuringGame : MonoBehaviour
     [SerializeField]
     private Text scoreText;
     [SerializeField]
-    private AudioSource audio;
+    private AudioSource scoreUpAudio;
 
 
-    private int score;
+    private bool isEventSigned = false;
+    private int currentScore;
 
 
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
-        scoreText.text = "0";
+        if (!isEventSigned)
+        {
+            scoreText.text = "0";
 
-        Player.OnScoreUp += ScoreDuringGame_OnScoreUp;
-        Player.OnEndGame += ScoreDuringGame_OnEndGame;
-        EndMenu.OnReloadGame += ScoreDuringGame_OnReloadGame;
-        StartMenu.OnStartGame += ScoreDuringGame_OnStartGame;
+            Player.OnScoreUp += ScoreDuringGame_OnScoreUp;
+            Player.OnEndGame += ScoreDuringGame_OnEndGame;
+            EndMenu.OnReloadGame += ScoreDuringGame_OnReloadGame;
+            StartMenu.OnStartGame += ScoreDuringGame_OnStartGame;
 
-        gameObject.SetActive(false);
-    }
+            gameObject.SetActive(false);
 
-
-    private void OnDestroy()
-    {
-        Player.OnScoreUp -= ScoreDuringGame_OnScoreUp;
-        Player.OnEndGame -= ScoreDuringGame_OnEndGame;
-        EndMenu.OnReloadGame -= ScoreDuringGame_OnReloadGame;
-        StartMenu.OnStartGame -= ScoreDuringGame_OnStartGame;
+            isEventSigned = true;
+        }
     }
 
     #endregion
@@ -44,11 +39,10 @@ public class ScoreDuringGame : MonoBehaviour
 
     private void ScoreDuringGame_OnScoreUp()
     {
-        score++;
+        currentScore++;
+        scoreText.text = currentScore.ToString();
 
-        scoreText.text = score.ToString();
-
-        audio.Play();
+        scoreUpAudio.Play();
     }
 
 
@@ -60,8 +54,9 @@ public class ScoreDuringGame : MonoBehaviour
 
     private void ScoreDuringGame_OnReloadGame()
     {
-        score = 0;
+        currentScore = 0;
         scoreText.text = "0";
+
         gameObject.SetActive(true);
     }
 

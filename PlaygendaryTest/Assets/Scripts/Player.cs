@@ -1,12 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 public class Player : MonoBehaviour
 {
     public static event Action OnMoveNext;
-    public static event Action OnStickFallDown;
+    public static event Action OnStickStartFallDown;
     public static event Action OnScoreUp;
     public static event Action OnPlayerStartHorizontalMovement;
     public static event Action OnPlayerEndHorizontalMovement;
@@ -16,9 +14,9 @@ public class Player : MonoBehaviour
     #region Fields
 
     [SerializeField]
-    private Animator anim;
+    private Animator animator;
     [SerializeField]
-    private float playerSpeed;
+    private float playerHorizontalMovingSpeed;
     [SerializeField]
     private float playerFallSpeed;
     [SerializeField]
@@ -30,10 +28,10 @@ public class Player : MonoBehaviour
     private Vector2 playerPosition;
     private Vector2 statrMovementPosition;
     private Vector2 targetMovementPosition;
-    private float fraction;
-    private float startTime;
+    private float fractionCoefficient;
+    private float startMovingTime;
     private float movementTime;
-    private bool isMove;
+    private bool isMoving;
     private PlayerMovementState movementState;
 
     #endregion
@@ -42,52 +40,56 @@ public class Player : MonoBehaviour
     public static Vector2 StartPosition { get; private set; }
 
 
+    //private Transform trans;
+
+
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
+        //trans = GetComponent<Transform>();
         StartPosition = new Vector2(-5, 0.42f);
         playerPosition = transform.position;
         movementState = PlayerMovementState.TwoPoint;
 
         StartMenu.OnStartGame += Player_OnReloadGame;
-        Stick.OnStickFallHorizontal += Player_OnStickFallHorizontal;
+        Stick.OnStickFellHorizontal += Player_OnStickFallHorizontal;
         EndMenu.OnReloadGame += Player_OnReloadGame;
     }
 
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         StartMenu.OnStartGame -= Player_OnReloadGame;
-        Stick.OnStickFallHorizontal -= Player_OnStickFallHorizontal;
+        Stick.OnStickFellHorizontal -= Player_OnStickFallHorizontal;
         EndMenu.OnReloadGame -= Player_OnReloadGame;
     }
 
 
     private void Update()
     {
-        if (isMove)
+        if (isMoving)
         {
-            fraction = (Time.realtimeSinceStartup - startTime) / movementTime;
+            fractionCoefficient = (Time.realtimeSinceStartup - startMovingTime) / movementTime;
 
-            if (fraction > 1f)
+            if (fractionCoefficient > MathConsts.MAX_FRACTION_COEFFICIENT)
             {
-                fraction = 1;
+                fractionCoefficient = MathConsts.MAX_FRACTION_COEFFICIENT;
 
-                isMove = false;
+                isMoving = false;
 
                 switch (movementState)
                 {
-                    case PlayerMovementState.Horizontal:
+                    case PlayerMovementState.HorizontalBeforeReturn:
                         OnScoreUp();
                         OnMoveNext();
                         OnPlayerEndHorizontalMovement();
-                        StartMove(StartPosition, PlatformManager.MOVE_TIME, PlayerMovementState.Back);
+                        StartMove(StartPosition, PlatformManager.PLATFORM_MOVING_TIME, PlayerMovementState.Return);
                         break;
 
-                    case PlayerMovementState.FallHorizontal:
+                    case PlayerMovementState.HorizontalBeforeFallDown:
                         OnPlayerEndHorizontalMovement();
-                        OnStickFallDown();
+                        OnStickStartFallDown();
                         targetMovementPosition = playerPosition;
                         targetMovementPosition.y -= playerFallDistance;
                         float movementTime = playerFallDistance / playerFallSpeed;
@@ -100,11 +102,23 @@ public class Player : MonoBehaviour
                         break;
                 }
 
-                anim.SetBool("isRun", false);
+                animator.SetBool("isRun", false);
             }
 
-            playerPosition = Vector2.Lerp(statrMovementPosition, targetMovementPosition, fraction);
+            playerPosition = Vector2.Lerp(statrMovementPosition, targetMovementPosition, fractionCoefficient);
             transform.position = playerPosition;
+
+            /*Profiler.BeginSample("method transform player");
+            System.Threading.Thread.Sleep(1000);
+            for (int i = 0; i < 1000; i++)
+              transform.position = playerPosition;
+            Profiler.EndSample();
+
+            Profiler.BeginSample("field transform player");
+            System.Threading.Thread.Sleep(1000);
+            for (int i = 0; i < 1000; i++)
+                trans.position = playerPosition;
+            Profiler.EndSample();*/
         }
     }
 
@@ -115,30 +129,30 @@ public class Player : MonoBehaviour
 
     private void Player_OnStickFallHorizontal(float stickSize)
     {
-        float endOfPlatform = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
-        bool isFall = (stickSize < PlatformManager.NewDistance) || stickSize > endOfPlatform;
-        movementState = isFall ? PlayerMovementState.FallHorizontal : PlayerMovementState.Horizontal;
+        float endOfPlatformDistance = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
+        bool isFall = (stickSize < PlatformManager.NewDistance) || stickSize > endOfPlatformDistance;
+        movementState = isFall ? PlayerMovementState.HorizontalBeforeFallDown : PlayerMovementState.HorizontalBeforeReturn;
 
         Vector2 targetPosition = StartPosition;
         float movementTime;
 
         if (isFall)
         {
-            if (stickSize > 15)
-            {
-                stickSize = 15;
-            }
             targetPosition.x += stickSize;
-            movementTime = stickSize / playerSpeed;
+            movementTime = stickSize / playerHorizontalMovingSpeed;
         }
         else
         {
             targetPosition.x += PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
-            movementTime = (PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth) / playerSpeed;
+            movementTime = (PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth) / playerHorizontalMovingSpeed;
 
-            float startRedSquare = PlatformManager.NewDistance + (PlatformManager.BehindPlatformWidth / 2f) - (RedSquare.Width / 2f);
-            float endRedSquare = startRedSquare + RedSquare.Width;
-            if (stickSize > startRedSquare && stickSize < endRedSquare)
+            float startRedSquareDistance = PlatformManager.NewDistance;
+            startRedSquareDistance += PlatformManager.BehindPlatformWidth * MathConsts.HALF_COEFFICIENT;
+            startRedSquareDistance -= RedSquare.Width * MathConsts.HALF_COEFFICIENT;
+
+            float endRedSquareDistance = startRedSquareDistance + RedSquare.Width;
+
+            if (stickSize > startRedSquareDistance && stickSize < endRedSquareDistance)
             {
                 OnScoreUp();
             }
@@ -151,7 +165,7 @@ public class Player : MonoBehaviour
 
     private void Player_OnReloadGame()
     {
-        StartTwoPointMove(StartPosition, PlatformManager.MOVE_TIME);
+        StartTwoPointMove(StartPosition, PlatformManager.PLATFORM_MOVING_TIME);
     }
 
     #endregion
@@ -165,9 +179,9 @@ public class Player : MonoBehaviour
         this.movementTime = movementTime;
 
         statrMovementPosition = playerPosition;
-        startTime = Time.realtimeSinceStartup;
-        fraction = 0;
-        isMove = true;
+        startMovingTime = Time.realtimeSinceStartup;
+        fractionCoefficient = MathConsts.MIN_FRACTION_COEFFICIENT;
+        isMoving = true;
         movementState = PlayerMovementState.TwoPoint;
     }
 
@@ -178,7 +192,7 @@ public class Player : MonoBehaviour
 
         this.movementState = movementState;
 
-        anim.SetBool("isRun", true);
+        animator.SetBool("isRun", true);
     }
 
     #endregion

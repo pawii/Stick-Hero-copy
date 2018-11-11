@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class PartOfPlatform : MonoBehaviour
 {
@@ -8,32 +6,36 @@ public abstract class PartOfPlatform : MonoBehaviour
     protected States state;
 
 
+    private bool isEventSigned = false;
+    private const int MIN_STATE = 1;
+    private const int MAX_STATE = 3;
+    private const int CHANGE_STEP = 1;
+
+
     #region Unity lifecycle
 
-    protected void Awake()
+    protected void OnEnable()
     {
-        PlatformManager.OnMovePlatform += PartOfPlatform_OnMovePlatform;
-    }
-
-
-    protected void OnDestroy()
-    {
-        PlatformManager.OnMovePlatform -= PartOfPlatform_OnMovePlatform;
+        if (!isEventSigned)
+        {
+            PlatformManager.OnMovePlatform += PartOfPlatform_OnMovePlatform;
+            isEventSigned = true;
+        }
     }
 
     #endregion
 
 
     #region Event handlers
-    
+
     private void PartOfPlatform_OnMovePlatform()
     {
         HandleOnMovePlatform();
 
-        int newState = (int)state - 1;
-        if (newState == 0)
+        int newState = (int)state - CHANGE_STEP;
+        if (newState < MIN_STATE)
         {
-            newState = 3;
+            newState = MAX_STATE;
         }
         state = (States)newState;
     }

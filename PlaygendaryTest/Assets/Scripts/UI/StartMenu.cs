@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using UnityEngine.UI;
 
@@ -18,10 +16,11 @@ public class StartMenu : MonoBehaviour
 
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
         isAudioPaused = false;
         AudioListener.pause = isAudioPaused;
+
         soundButtonText.text = "Sound on";
     }
 
@@ -34,7 +33,7 @@ public class StartMenu : MonoBehaviour
     {
         OnStartGame();
 
-        gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 
 

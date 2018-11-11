@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿
 public class RedSquare : PartOfPlatform
 {
     public static readonly float Width;
@@ -15,7 +12,7 @@ public class RedSquare : PartOfPlatform
 
     protected override void HandleOnMovePlatform()
     {
-        if(state == States.Behind)
+        if (state == States.Behind)
         {
             gameObject.SetActive(true);
         }

@@ -83,6 +83,7 @@
     <Compile Include="Assets\Scripts\BlackRectangle.cs" />
     <Compile Include="Assets\Scripts\Managers\PlatformManager.cs" />
     <Compile Include="Assets\Scripts\Managers\ScoreManager.cs" />
+    <Compile Include="Assets\Scripts\MathConsts.cs" />
     <Compile Include="Assets\Scripts\PartOfPlatform.cs" />
     <Compile Include="Assets\Scripts\Platform.cs" />
     <Compile Include="Assets\Scripts\PlatformState\BehindPlatform.cs" />

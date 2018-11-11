@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
 
@@ -15,19 +13,20 @@ public class EndMenu : MonoBehaviour
     private Text countBestScoreText;
 
 
+    private bool isEventSigned = false;
+
+
     #region Unity lifecycle
 
-    private void Awake()
+    private void OnEnable()
     {
-        Player.OnEndGame += EndMenu_OnEndGame;
+        if (!isEventSigned)
+        {
+            Player.OnEndGame += EndMenu_OnEndGame;
+            isEventSigned = true;
 
-        gameObject.SetActive(false);
-    }
-
-
-    private void OnDestroy()
-    {
-        Player.OnEndGame -= EndMenu_OnEndGame;
+            gameObject.SetActive(false);
+        }
     }
 
     #endregion
