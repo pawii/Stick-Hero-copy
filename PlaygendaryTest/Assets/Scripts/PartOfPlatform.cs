@@ -2,14 +2,16 @@
 
 public abstract class PartOfPlatform : MonoBehaviour
 {
+    private const int MIN_STATE = 1;
+    private const int MAX_STATE = 3;
+    private const int CHANGE_STEP = 1;
+
+
     [SerializeField]
     protected States state;
 
 
     private bool isEventSigned = false;
-    private const int MIN_STATE = 1;
-    private const int MAX_STATE = 3;
-    private const int CHANGE_STEP = 1;
 
 
     #region Unity lifecycle

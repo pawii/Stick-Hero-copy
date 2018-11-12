@@ -10,6 +10,10 @@ public class ScoreManager : MonoBehaviour
     public static event Action OnScoresUnload;
 
 
+    private static int _bestScore;
+    private static int _countCherry;
+
+
     public static int CurrentScore { get; private set; }
     public static int BestScore // Not authomatical property, because serialized (Richter)
     {
@@ -33,10 +37,6 @@ public class ScoreManager : MonoBehaviour
             _countCherry = value;
         }
     }
-
-
-    private static int _bestScore;
-    private static int _countCherry;
 
 
     #region Unity lifecycle

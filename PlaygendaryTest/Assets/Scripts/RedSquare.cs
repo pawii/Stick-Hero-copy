@@ -6,7 +6,7 @@ public class RedSquare : PartOfPlatform
 
     static RedSquare()
     {
-        Width = 0.5f;
+        Width = 0.3f;
     }
 
 

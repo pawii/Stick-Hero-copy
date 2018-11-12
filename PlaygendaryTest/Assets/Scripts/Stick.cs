@@ -7,11 +7,11 @@ public class Stick : PartOfPlatform
     private const int FALL_HORIZONTAL_END_ANGLE = -90;
     private const int START_ROTATION = 0;
 
+    
+    private static bool isLock;
+
 
     public static event Action<float> OnStickFellHorizontal;
-
-
-    private static bool isLock;
 
 
     #region Fields

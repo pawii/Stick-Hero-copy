@@ -20,10 +20,11 @@ public class MenuDuringGame : MonoBehaviour
 
     private void OnEnable()
     {
+        Player.OnScoreUp += ScoreDuringGame_OnScoreUp;
+        Player.OnCherryUp += ScoreDuringGame_OnCherryUp;
+
         if (!isEventSigned)
         {
-            Player.OnScoreUp += ScoreDuringGame_OnScoreUp;
-            Player.OnCherryUp += ScoreDuringGame_OnCherryUp;
             Player.OnEndGame += ScoreDuringGame_OnEndGame;
             EndMenu.OnReloadGame += ScoreDuringGame_OnReloadGame;
             StartMenu.OnStartGame += ScoreDuringGame_OnStartGame;
@@ -32,6 +33,13 @@ public class MenuDuringGame : MonoBehaviour
 
             isEventSigned = true;
         }
+    }
+
+
+    private void OnDisable()
+    {
+        Player.OnScoreUp -= ScoreDuringGame_OnScoreUp;
+        Player.OnCherryUp -= ScoreDuringGame_OnCherryUp;
     }
 
     #endregion

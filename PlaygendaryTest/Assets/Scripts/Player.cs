@@ -47,6 +47,8 @@ public class Player : MonoBehaviour
 
 
     public static Vector2 StartPosition { get; private set; }
+
+
     private PlayerMovementState MovementState { get; set; }
 
 
