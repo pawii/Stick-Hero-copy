@@ -24,6 +24,8 @@ public class Stick : PartOfPlatform
     private float rotationSpeed;
     [SerializeField]
     private AudioSource growStickAudio;
+    [SerializeField]
+    private Transform stickTransform;
 
 
     private bool isRotating;
@@ -62,13 +64,13 @@ public class Stick : PartOfPlatform
         {
             if (!isLock)
             {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    growStickAudio.Play();
-                }
-
                 if (Input.GetMouseButton(0))
                 {
+                    if (!growStickAudio.isPlaying)
+                    {
+                        growStickAudio.Play();
+                    }
+
                     scale.y += growSpeed * Time.deltaTime;
 
                     if (scale.y > maxSize)
@@ -77,7 +79,7 @@ public class Stick : PartOfPlatform
                     }
                     else
                     {
-                        transform.localScale = scale;
+                        stickTransform.localScale = scale;
                     }
                 }
 
@@ -106,7 +108,7 @@ public class Stick : PartOfPlatform
                     }
                 }
 
-                transform.localEulerAngles = currentRotation;
+                stickTransform.localEulerAngles = currentRotation;
             }
         }
 	}
@@ -147,10 +149,10 @@ public class Stick : PartOfPlatform
         isRotating = false;
 
         scale = Vector2.right;
-        transform.localScale = scale;
+        stickTransform.localScale = scale;
 
         currentRotation.z = START_ROTATION;
-        transform.localEulerAngles = currentRotation;
+        stickTransform.localEulerAngles = currentRotation;
     }
 
     #endregion
@@ -166,7 +168,7 @@ public class Stick : PartOfPlatform
         {
             Vector2 targetPosition = Vector2.zero;
             targetPosition.x += PlatformManager.FontPlatformWidth * MathConsts.HALF_COEFFICIENT;
-            transform.localPosition = targetPosition;
+            stickTransform.localPosition = targetPosition;
         }
     }
 }

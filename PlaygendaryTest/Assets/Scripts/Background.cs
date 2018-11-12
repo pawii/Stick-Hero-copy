@@ -2,14 +2,18 @@
 
 public class Background : MonoBehaviour
 {
-    private static float Width;
+    private const int START_POSITION = 0;
 
 
     [SerializeField]
     private float movingSpeed;
+    [SerializeField]
+    private float width;
+    [SerializeField]
+    private Transform backgroundTransform;
 
 
-    private Vector2 position;
+    private Vector2 currentPosition;
     private bool isMoving;
 
 
@@ -17,9 +21,8 @@ public class Background : MonoBehaviour
 
     private void OnEnable()
     {
-        position = transform.position;
+        currentPosition = transform.position;
         isMoving = false;
-        Width = transform.localScale.x;
 
         Player.OnPlayerStartHorizontalMovement += Background_OnPlayerStartHorizontalMovement;
         Player.OnPlayerEndHorizontalMovement += Background_OnPlayerEndHorizontalMovement;
@@ -37,13 +40,13 @@ public class Background : MonoBehaviour
     {
         if (isMoving)
         {
-            position.x -= movingSpeed * Time.deltaTime;
-            if (position.x < -Width)
+            currentPosition.x -= movingSpeed * Time.deltaTime;
+            if (currentPosition.x < -width)
             {
-                position.x = Width;
+                currentPosition.x += width;
             }
 
-            transform.localPosition = position;
+            backgroundTransform.localPosition = currentPosition;
         }
     }
 

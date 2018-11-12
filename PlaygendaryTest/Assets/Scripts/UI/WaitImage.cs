@@ -4,6 +4,9 @@ using UnityEngine;
 public class WaitImage : MonoBehaviour
 {
     private bool isEventSigned = false;
+    private bool isReloadGameCome = false;
+    private float startTimeOfReload;
+    private float pastTimeOfReload;
 
 
     #region Unity lifecycle
@@ -13,10 +16,31 @@ public class WaitImage : MonoBehaviour
         if (!isEventSigned)
         {
             EndMenu.OnReloadGame += WaitImage_OnReloadGame;
-
-            gameObject.SetActive(false);
+            StartupController.OnSceneLoad += WaitImage_OnSceneLoad;
 
             isEventSigned = true;
+        }
+    }
+
+
+    private void OnDisable()
+    {
+        StartupController.OnSceneLoad -= WaitImage_OnSceneLoad;
+    }
+
+
+    private void Update()
+    {
+        if (isReloadGameCome)
+        {
+            pastTimeOfReload = Time.realtimeSinceStartup - startTimeOfReload;
+
+            if (pastTimeOfReload > PlatformManager.PLATFORM_MOVING_TIME)
+            {
+                gameObject.SetActive(false);
+
+                isReloadGameCome = false;
+            }
         }
     }
 
@@ -28,19 +52,17 @@ public class WaitImage : MonoBehaviour
     private void WaitImage_OnReloadGame()
     {
         gameObject.SetActive(true);
-        StartCoroutine(Wait());
+
+        startTimeOfReload = Time.realtimeSinceStartup;
+        isReloadGameCome = true;
     }
 
-    #endregion
-    
 
-    #region Private methods
-
-    private IEnumerator Wait()
+    private void WaitImage_OnSceneLoad()
     {
-        yield return new WaitForSeconds(PlatformManager.PLATFORM_MOVING_TIME);
         gameObject.SetActive(false);
     }
 
     #endregion
+
 }

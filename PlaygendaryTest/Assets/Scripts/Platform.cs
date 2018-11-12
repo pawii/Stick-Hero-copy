@@ -8,6 +8,8 @@ public class Platform : MonoBehaviour
 
     [SerializeField]
     private States startState;
+    [SerializeField]
+    private Transform platformTransform;
 
 
     private bool isMoving;
@@ -62,7 +64,7 @@ public class Platform : MonoBehaviour
                 OnPlatformEndMovement();
             }
 
-            transform.position = Vector2.Lerp(startMovingPosition, targetMovingPosition, fractionCoefficient);
+            platformTransform.position = Vector2.Lerp(startMovingPosition, targetMovingPosition, fractionCoefficient);
         }
     }
 
@@ -74,7 +76,7 @@ public class Platform : MonoBehaviour
     private void Platform_OnMovePlatform()
     {
         targetMovingPosition = State.MovePlatform(this);
-        startMovingPosition = transform.position;
+        startMovingPosition = platformTransform.position;
         startMovingTime = Time.realtimeSinceStartup;
         fractionCoefficient = MathConsts.MIN_FRACTION_COEFFICIENT;
         isMoving = true;

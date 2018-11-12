@@ -1,11 +1,17 @@
 ﻿using UnityEngine;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
+using System;
 
 public class ScoreManager : MonoBehaviour
 {
-    public static uint CurrentScore { get; private set; }
-    public static uint BestScore // Not authomatical property because serialized (Richter)
+    private const string NAME_SCORE_VARIABLE = "BestScore";
+    private const string NAME_CHERRY_VARIABLE = "CountCherry";
+
+
+    public static event Action OnScoresUnload;
+
+
+    public static int CurrentScore { get; private set; }
+    public static int BestScore // Not authomatical property, because serialized (Richter)
     {
         get
         {
@@ -16,30 +22,40 @@ public class ScoreManager : MonoBehaviour
             _bestScore = value;
         }
     }
+    public static int CountCherry // Not authomatical property, because serialized (Richter)
+    {
+        get
+        {
+            return _countCherry;
+        }
+        private set
+        {
+            _countCherry = value;
+        }
+    }
 
 
-    private string filename;
-    private static uint _bestScore;
+    private static int _bestScore;
+    private static int _countCherry;
 
 
     #region Unity lifecycle
 
     private void OnEnable()
     {
-        filename = Path.Combine(Application.persistentDataPath, "game.dat");
-
         Player.OnScoreUp += ScoreManager_OnScoreUp;
-        Player.OnEndGame += ScoreManager_OnEndGame;
+        Player.OnCherryUp += ScoreManager_OnCherryUp;
         EndMenu.OnReloadGame += ScoreManager_OnReloadGame;
 
         UnloadScore();
+
+        OnScoresUnload();
     }
 
 
     private void OnDisable()
     {
         Player.OnScoreUp -= ScoreManager_OnScoreUp;
-        Player.OnEndGame -= ScoreManager_OnEndGame;
         EndMenu.OnReloadGame -= ScoreManager_OnReloadGame;
     }
 
@@ -54,16 +70,15 @@ public class ScoreManager : MonoBehaviour
         if (CurrentScore > BestScore)
         {
             BestScore = CurrentScore;
+            SaveScore();
         }
     }
 
 
-    private void ScoreManager_OnEndGame()
+    private void ScoreManager_OnCherryUp()
     {
-        if (CurrentScore == BestScore)
-        {
-            SaveScore();
-        }
+        CountCherry ++;
+        SaveScore();
     }
 
 
@@ -79,25 +94,18 @@ public class ScoreManager : MonoBehaviour
 
     private void SaveScore()
     {
-        FileStream stream = File.Create(filename);
-        BinaryFormatter formatter = new BinaryFormatter();
-        formatter.Serialize(stream, _bestScore);
-        stream.Close();
+        if (CurrentScore == BestScore)
+        {
+            PlayerPrefs.SetInt(NAME_SCORE_VARIABLE, BestScore);
+        }
+        PlayerPrefs.SetInt(NAME_CHERRY_VARIABLE, CountCherry);
     }
 
 
     private void UnloadScore()
     {
-        if (!File.Exists(filename))
-        {
-            _bestScore = 0;
-            return;
-        }
-        
-        BinaryFormatter formatter = new BinaryFormatter();
-        FileStream stream = File.Open(filename, FileMode.Open);
-        _bestScore = (uint)formatter.Deserialize(stream);
-        stream.Close();
+        BestScore = PlayerPrefs.GetInt(NAME_SCORE_VARIABLE, 0);
+        CountCherry = PlayerPrefs.GetInt(NAME_CHERRY_VARIABLE, 0);
     }
 
     #endregion

@@ -3,9 +3,14 @@ using System;
 
 public class Player : MonoBehaviour
 {
+    private const string CHERRY_TAG = "cherry";
+    private const string PLATFORM_TAG = "platform";
+
+
     public static event Action OnMoveNext;
     public static event Action OnStickStartFallDown;
     public static event Action OnScoreUp;
+    public static event Action OnCherryUp;
     public static event Action OnPlayerStartHorizontalMovement;
     public static event Action OnPlayerEndHorizontalMovement;
     public static event Action OnEndGame;
@@ -23,34 +28,34 @@ public class Player : MonoBehaviour
     private float playerFallDistance;
     [SerializeField]
     private AudioSource fallAudio;
+    [SerializeField]
+    private Transform playerTransform;
+    [SerializeField]
+    private float rotationalPositionOffset;
 
-
-    private Vector2 playerPosition;
+    
     private Vector2 statrMovementPosition;
     private Vector2 targetMovementPosition;
     private float fractionCoefficient;
     private float startMovingTime;
     private float movementTime;
-    private bool isMoving;
-    private PlayerMovementState movementState;
+    private bool isMoving = false;
+    private bool isPickUpCherry = false;
+    private bool isRotationLock = true;
 
     #endregion
 
 
     public static Vector2 StartPosition { get; private set; }
-
-
-    //private Transform trans;
+    private PlayerMovementState MovementState { get; set; }
 
 
     #region Unity lifecycle
 
     private void OnEnable()
     {
-        //trans = GetComponent<Transform>();
         StartPosition = new Vector2(-5, 0.42f);
-        playerPosition = transform.position;
-        movementState = PlayerMovementState.TwoPoint;
+        MovementState = PlayerMovementState.TwoPoint;
 
         StartMenu.OnStartGame += Player_OnReloadGame;
         Stick.OnStickFellHorizontal += Player_OnStickFallHorizontal;
@@ -70,6 +75,15 @@ public class Player : MonoBehaviour
     {
         if (isMoving)
         {
+            if (!isRotationLock)
+            {
+                if (Input.GetMouseButtonUp(0))
+                {
+                    RotatePlayer();
+                }
+            }
+
+
             fractionCoefficient = (Time.realtimeSinceStartup - startMovingTime) / movementTime;
 
             if (fractionCoefficient > MathConsts.MAX_FRACTION_COEFFICIENT)
@@ -78,47 +92,61 @@ public class Player : MonoBehaviour
 
                 isMoving = false;
 
-                switch (movementState)
+                switch (MovementState)
                 {
                     case PlayerMovementState.HorizontalBeforeReturn:
+                        if (isPickUpCherry)
+                        {
+                            OnCherryUp();
+                            isPickUpCherry = false;
+                        }
                         OnScoreUp();
                         OnMoveNext();
                         OnPlayerEndHorizontalMovement();
+                        
                         StartMove(StartPosition, PlatformManager.PLATFORM_MOVING_TIME, PlayerMovementState.Return);
                         break;
 
                     case PlayerMovementState.HorizontalBeforeFallDown:
+                        isRotationLock = true;
+
                         OnPlayerEndHorizontalMovement();
                         OnStickStartFallDown();
-                        targetMovementPosition = playerPosition;
-                        targetMovementPosition.y -= playerFallDistance;
-                        float movementTime = playerFallDistance / playerFallSpeed;
-                        StartMove(targetMovementPosition, movementTime, PlayerMovementState.FallDown);
+                        StartFallDownMovement();
                         break;
 
                     case PlayerMovementState.FallDown:
-                        OnEndGame();
                         fallAudio.Play();
+                        OnEndGame();
                         break;
                 }
 
                 animator.SetBool("isRun", false);
             }
+            
+            playerTransform.position = Vector2.Lerp(statrMovementPosition, targetMovementPosition, fractionCoefficient);
+        }
+    }
 
-            playerPosition = Vector2.Lerp(statrMovementPosition, targetMovementPosition, fractionCoefficient);
-            transform.position = playerPosition;
 
-            /*Profiler.BeginSample("method transform player");
-            System.Threading.Thread.Sleep(1000);
-            for (int i = 0; i < 1000; i++)
-              transform.position = playerPosition;
-            Profiler.EndSample();
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        string collisionTag = collision.tag;
 
-            Profiler.BeginSample("field transform player");
-            System.Threading.Thread.Sleep(1000);
-            for (int i = 0; i < 1000; i++)
-                trans.position = playerPosition;
-            Profiler.EndSample();*/
+        if (collisionTag == CHERRY_TAG)
+        {
+            isPickUpCherry = true;
+        }
+        else if (collisionTag == PLATFORM_TAG)
+        {
+            isRotationLock = true;
+
+            if (playerTransform.localScale.y < 0)
+            {
+                StartFallDownMovement();
+                OnStickStartFallDown();
+                OnPlayerEndHorizontalMovement();
+            }
         }
     }
 
@@ -131,7 +159,7 @@ public class Player : MonoBehaviour
     {
         float endOfPlatformDistance = PlatformManager.NewDistance + PlatformManager.BehindPlatformWidth;
         bool isFall = (stickSize < PlatformManager.NewDistance) || stickSize > endOfPlatformDistance;
-        movementState = isFall ? PlayerMovementState.HorizontalBeforeFallDown : PlayerMovementState.HorizontalBeforeReturn;
+        MovementState = isFall ? PlayerMovementState.HorizontalBeforeFallDown : PlayerMovementState.HorizontalBeforeReturn;
 
         Vector2 targetPosition = StartPosition;
         float movementTime;
@@ -159,12 +187,19 @@ public class Player : MonoBehaviour
         }
         
         OnPlayerStartHorizontalMovement();
-        StartMove(targetPosition, movementTime, movementState);
+        StartMove(targetPosition, movementTime, MovementState);
+        isRotationLock = false;
+
+        animator.SetBool("isRun", true);
     }
 
 
     private void Player_OnReloadGame()
     {
+        if (playerTransform.localScale.y < 0)
+        {
+            RotatePlayer();
+        }
         StartTwoPointMove(StartPosition, PlatformManager.PLATFORM_MOVING_TIME);
     }
 
@@ -178,11 +213,11 @@ public class Player : MonoBehaviour
         this.targetMovementPosition = targetPosition;
         this.movementTime = movementTime;
 
-        statrMovementPosition = playerPosition;
+        statrMovementPosition = playerTransform.position;
         startMovingTime = Time.realtimeSinceStartup;
         fractionCoefficient = MathConsts.MIN_FRACTION_COEFFICIENT;
+        MovementState = PlayerMovementState.TwoPoint;
         isMoving = true;
-        movementState = PlayerMovementState.TwoPoint;
     }
 
 
@@ -190,9 +225,30 @@ public class Player : MonoBehaviour
     {
         StartTwoPointMove(targetPosition, movementTime);
 
-        this.movementState = movementState;
+        this.MovementState = movementState;
+    }
 
-        animator.SetBool("isRun", true);
+
+    private void StartFallDownMovement()
+    {
+        targetMovementPosition = playerTransform.position;
+        targetMovementPosition.y -= playerFallDistance;
+        float movementTime = playerFallDistance / playerFallSpeed;
+        StartMove(targetMovementPosition, movementTime, PlayerMovementState.FallDown);
+    }
+
+
+    private void RotatePlayer()
+    {
+        Vector2 newScale = playerTransform.localScale;
+        newScale.y = playerTransform.localScale.y * MathConsts.NEGATIVE_COEFFICIENT;
+        playerTransform.localScale = newScale;
+
+        Vector2 targetPosition = playerTransform.position;
+        targetPosition.y += newScale.y * rotationalPositionOffset;
+        statrMovementPosition.y = targetPosition.y;
+        targetMovementPosition.y = targetPosition.y;
+        playerTransform.position = targetPosition;
     }
 
     #endregion
